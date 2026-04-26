@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 import os
 from telegram import WebAppInfo
 API_BASE    = os.environ.get("API_BASE_URL", "http://localhost:8000")
-WEBAPP_BASE = os.environ.get("API_BASE_URL", "http://localhost:8000") + "/webapp"
+WEBAPP_BASE = os.environ.get("APP_PUBLIC_URL", API_BASE) + "/webapp"
 
 
 async def show_passport(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
