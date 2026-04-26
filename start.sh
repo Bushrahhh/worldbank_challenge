@@ -3,6 +3,7 @@ set -e
 
 PORT="${PORT:-8000}"
 export API_BASE_URL="http://localhost:${PORT}"
+export APP_PUBLIC_URL="https://web-production-1fa06.up.railway.app"
 
 echo "Starting UNMAPPED API on port ${PORT}..."
 python -m uvicorn backend.main:app --host 0.0.0.0 --port "${PORT}" &
