@@ -151,10 +151,11 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 async def _handle_vouch_confirm(query, token: str) -> None:
     """Demo vouch confirmation via button press."""
     import httpx
+    api_base = os.environ.get("API_BASE_URL", "http://localhost:8000")
     try:
         async with httpx.AsyncClient() as client:
             resp = await client.post(
-                f"http://localhost:8000/skills/vouch/{token}",
+                f"{api_base}/skills/vouch/{token}",
                 json={"reply": "YES"},
             )
         if resp.status_code == 200:
