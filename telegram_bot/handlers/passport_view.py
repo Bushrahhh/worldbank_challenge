@@ -12,7 +12,9 @@ from telegram.ext import ContextTypes
 logger = logging.getLogger(__name__)
 
 import os
-API_BASE = os.environ.get("API_BASE_URL", "http://localhost:8000")
+from telegram import WebAppInfo
+API_BASE    = os.environ.get("API_BASE_URL", "http://localhost:8000")
+WEBAPP_BASE = os.environ.get("API_BASE_URL", "http://localhost:8000") + "/webapp"
 
 
 async def show_passport(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -75,9 +77,11 @@ async def show_passport(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     lines.append("Legend: ○ self-reported  ● peer-verified  ★ employer-verified")
 
     keyboard = [
-        [
-            InlineKeyboardButton("Get QR Code", callback_data=f"passport_qr:{passport_uuid}"),
-        ],
+        [InlineKeyboardButton(
+            "View Visual Passport",
+            web_app=WebAppInfo(url=f"{WEBAPP_BASE}/passport.html?id={passport_uuid}"),
+        )],
+        [InlineKeyboardButton("Get QR Code", callback_data=f"passport_qr:{passport_uuid}")],
     ]
 
     await update.message.reply_text(
