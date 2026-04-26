@@ -10,10 +10,11 @@ import httpx
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update, WebAppInfo
 from telegram.ext import ContextTypes
 
+import os
 logger = logging.getLogger(__name__)
 
-API_BASE    = "http://localhost:8000"
-WEBAPP_BASE = "http://localhost:8000/webapp"
+API_BASE    = os.environ.get("API_BASE_URL", "http://localhost:8000")
+WEBAPP_BASE = os.environ.get("API_BASE_URL", "http://localhost:8000") + "/webapp"
 
 
 async def show_readiness(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
