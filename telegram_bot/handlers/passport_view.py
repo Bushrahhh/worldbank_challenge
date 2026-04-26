@@ -76,13 +76,10 @@ async def show_passport(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     lines.append("")
     lines.append("Legend: ○ self-reported  ● peer-verified  ★ employer-verified")
 
-    keyboard = [
-        [InlineKeyboardButton(
-            "View Visual Passport",
-            web_app=WebAppInfo(url=f"{WEBAPP_BASE}/passport.html?id={passport_uuid}"),
-        )],
-        [InlineKeyboardButton("Get QR Code", callback_data=f"passport_qr:{passport_uuid}")],
-    ]
+    webapp_url = f"{WEBAPP_BASE}/passport.html?id={passport_uuid}"
+    keyboard = [[InlineKeyboardButton("Get QR Code", callback_data=f"passport_qr:{passport_uuid}")]]
+    if webapp_url.startswith("https://"):
+        keyboard.insert(0, [InlineKeyboardButton("View Visual Passport", web_app=WebAppInfo(url=webapp_url))])
 
     await update.message.reply_text(
         "\n".join(lines),

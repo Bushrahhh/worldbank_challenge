@@ -96,16 +96,11 @@ async def show_readiness(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     lines.append("Uncertainty ±15%.")
 
     webapp_url = f"{WEBAPP_BASE}/readiness.html?id={passport_uuid}"
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton(
-            "Open Readiness Lens",
-            web_app=WebAppInfo(url=webapp_url),
-        )],
-        [InlineKeyboardButton(
-            "View Time Machine 2035",
-            web_app=WebAppInfo(url=webapp_url + "#timemachine"),
-        )],
-    ])
+    buttons = []
+    if webapp_url.startswith("https://"):
+        buttons.append([InlineKeyboardButton("Open Readiness Lens", web_app=WebAppInfo(url=webapp_url))])
+        buttons.append([InlineKeyboardButton("View Time Machine 2035", web_app=WebAppInfo(url=webapp_url + "#timemachine"))])
+    keyboard = InlineKeyboardMarkup(buttons) if buttons else None
 
     await update.message.reply_text(
         "\n".join(lines),
