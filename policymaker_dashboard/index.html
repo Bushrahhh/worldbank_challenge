@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UNMAPPED — Policymaker View</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
+    body { font-family: 'Inter', sans-serif; background: #0a0a0f; color: #e8e8e8; }
+    .mono { font-family: 'IBM Plex Mono', monospace; }
+    .stat-glow { box-shadow: 0 0 24px rgba(239,68,68,0.15); }
+    .warn-glow { box-shadow: 0 0 24px rgba(245,158,11,0.15); }
+    .ok-glow   { box-shadow: 0 0 24px rgba(34,197,94,0.15); }
+    .bar-fill  { transition: width 1.2s cubic-bezier(0.4,0,0.2,1); }
+    .fade-in   { animation: fadeIn 0.6s ease-in; }
+    @keyframes fadeIn { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
+    .tooltip { position:relative; cursor:help; }
+    .tooltip:hover .tooltip-text { display:block; }
+    .tooltip-text {
+      display:none; position:absolute; bottom:100%; left:50%; transform:translateX(-50%);
+      background:#1a1a2e; border:1px solid #374151; color:#9ca3af; font-size:11px;
+      padding:6px 10px; border-radius:4px; white-space:nowrap; z-index:50;
+      font-family:'IBM Plex Mono',monospace; min-width:200px; max-width:280px;
+      white-space:normal; line-height:1.4;
+    }
+    .country-switch { transition: all 0.3s ease; }
+    .number-counter { transition: all 0.8s ease; }
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: #374151; border-radius: 3px; }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ──────────────────────────────────────────────────────────────────────────
+// Config
+// ──────────────────────────────────────────────────────────────────────────
+const API = window.location.origin;
+
+const COUNTRY_PRESETS = {
+  ghana: {
+    name: "Ghana",
+    iso: "GHA",
+    currency: "GHS",
+    flag: "🇬🇭",
+    district: "Greater Accra Region",
+    unmapped: 47000,
+    reach: 2300,
+    displacement_risk: 0.26,
+    informal_share: 0.89,
+    gdp_per_worker_usd: 1200,
+    top_sectors: ["Renewable Energy", "Digital Services", "Mobile Finance", "E-Waste", "TVET"],
+    color: "red",
+  },
+  bangladesh: {
+    name: "Bangladesh",
+    iso: "BGD",
+    currency: "BDT",
+    flag: "🇧🇩",
+    district: "Dhaka Division",
+    unmapped: 83000,
+    reach: 4100,
+    displacement_risk: 0.31,
+    informal_share: 0.85,
+    gdp_per_worker_usd: 950,
+    top_sectors: ["Garments QC", "Solar Home Systems", "Mobile Finance", "Logistics", "Digital Skills"],
+    color: "amber",
+  },
+};
+
+// ──────────────────────────────────────────────────────────────────────────
+// Utility
+// ──────────────────────────────────────────────────────────────────────────
+function fmt(n) { return n?.toLocaleString() ?? "–"; }
+function fmtPct(n) { return n != null ? `${(n * 100).toFixed(1)}%` : "–"; }
+function fmtUSD(n) { return n != null ? `$${n.toLocaleString()}` : "–"; }
+
+function Tooltip({ label, source, children }) {
+  return (
+    <span className="tooltip">
+      {children}
+      <span className="tooltip-text">
+        {label && <strong>{label}</strong>}
+        {label && source && <br />}
+        {source && <span style={{color:"#6ee7b7"}}>Source: {source}</span>}
+      </span>
+    </span>
+  );
+}
+
+function AnimatedNumber({ value, duration = 1200 }) {
+  const [display, setDisplay] = useState(0);
+  const start = useRef(0);
+  useEffect(() => {
+    const target = value || 0;
+    const step = target / (duration / 16);
+    let current = start.current;
+    const timer = setInterval(() => {
+      current = Math.min(current + step, target);
+      setDisplay(Math.floor(current));
+      if (current >= target) { clearInterval(timer); start.current = target; }
+    }, 16);
+    return () => clearInterval(timer);
+  }, [value]);
+  return <span className="number-counter">{fmt(display)}</span>;
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// District Header — the uncomfortable headline numbers
+// ──────────────────────────────────────────────────────────────────────────
+function DistrictHeader({ preset, stats }) {
+  const displaced = Math.round(preset.unmapped * preset.displacement_risk);
+  const unreached = preset.unmapped - preset.reach;
+  const coverage = (preset.reach / preset.unmapped * 100).toFixed(1);
+  const costUSD = displaced * preset.gdp_per_worker_usd * 5;
+
+  return (
+    <div className="fade-in">
+      {/* Headline banner */}
+      <div className="border border-red-900 bg-red-950/30 rounded-lg p-6 mb-6 stat-glow">
+        <div className="flex items-start gap-4">
+          <div className="text-4xl">⚠</div>
+          <div>
+            <h2 className="text-xl font-semibold text-red-400 mb-2">
+              {preset.district} — Skills Invisibility Crisis
+            </h2>
+            <p className="text-gray-300 leading-relaxed text-sm">
+              <strong className="text-white">{fmt(preset.unmapped)}</strong> workers in your district are invisible to the formal economy.
+              Current programs reach <strong className="text-white">{fmt(preset.reach)}</strong> — <strong className="text-yellow-400">{coverage}% coverage</strong>.
+              At current automation trajectory, <strong className="text-red-400">{fmt(displaced)}</strong> will be displaced by 2030 with no pathway visible.
+              Cost of inaction: <strong className="text-red-300">{fmtUSD(costUSD)} USD</strong> in lost productivity over 5 years.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <StatCard
+          value={preset.unmapped}
+          label="Unmapped Workers"
+          sublabel={preset.district}
+          color="red"
+          source="ILO informal employment estimate + World Bank STEP"
+          tooltip="Estimated workers in informal/semi-formal economy with no portable skills credential."
+        />
+        <StatCard
+          value={preset.reach}
+          label="Reached by Programs"
+          sublabel={`${coverage}% coverage`}
+          color="yellow"
+          source="Government program enrollment data"
+          tooltip="Annual enrollment across all registered skills development programs in district."
+        />
+        <StatCard
+          value={displaced}
+          label="Displaced by 2030"
+          sublabel="Without intervention"
+          color="red"
+          source="Frey-Osborne calibrated, UNMAPPED model"
+          tooltip={`${(preset.displacement_risk*100).toFixed(0)}% of unmapped workers are in high-automation-risk occupations. Calibrated for LMIC context.`}
+        />
+        <StatCard
+          value={costUSD}
+          label="USD Lost (5yr)"
+          sublabel="Cost of inaction"
+          color="orange"
+          source="World Bank Enterprise Surveys + ILO"
+          tooltip="Productivity loss at $1,200 USD/worker/year (SSA average). Does not include social costs."
+          prefix="$"
+        />
+      </div>
+    </div>
+  );
+}
+
+function StatCard({ value, label, sublabel, color, source, tooltip, prefix = "" }) {
+  const colors = {
+    red:    { border: "border-red-800",    bg: "bg-red-950/40",    text: "text-red-300"   },
+    yellow: { border: "border-yellow-800", bg: "bg-yellow-950/40", text: "text-yellow-300" },
+    orange: { border: "border-orange-800", bg: "bg-orange-950/40", text: "text-orange-300" },
+    green:  { border: "border-green-800",  bg: "bg-green-950/40",  text: "text-green-300"  },
+  };
+  const c = colors[color] || colors.red;
+  return (
+    <div className={`rounded-lg border ${c.border} ${c.bg} p-4`}>
+      <Tooltip label={tooltip} source={source}>
+        <div className={`text-2xl font-bold mono ${c.text} mb-1`}>
+          {prefix}<AnimatedNumber value={value} />
+        </div>
+      </Tooltip>
+      <div className="text-sm font-medium text-gray-200">{label}</div>
+      <div className="text-xs text-gray-500 mt-1">{sublabel}</div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Coverage Gap Bar
+// ──────────────────────────────────────────────────────────────────────────
+function CoverageGapBar({ preset }) {
+  const reachPct = (preset.reach / preset.unmapped * 100);
+  const dispPct  = preset.displacement_risk * 100;
+  const gapPct   = 100 - reachPct;
+
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5 mb-6 fade-in">
+      <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+        Coverage vs. Displacement Risk
+      </h3>
+      <div className="space-y-4">
+        <BarRow
+          label="Current program coverage"
+          pct={reachPct}
+          color="bg-blue-500"
+          source="Government program enrollment"
+          note={`${fmt(preset.reach)} workers / ${fmt(preset.unmapped)} total`}
+        />
+        <BarRow
+          label="Displacement risk by 2030"
+          pct={dispPct}
+          color="bg-red-500"
+          source="Frey-Osborne calibrated, UNMAPPED model"
+          note={`${fmt(Math.round(preset.unmapped * preset.displacement_risk))} workers at high automation risk`}
+        />
+        <BarRow
+          label="Coverage gap"
+          pct={gapPct}
+          color="bg-gray-600"
+          source="Derived"
+          note={`${fmt(preset.unmapped - preset.reach)} workers currently unreached`}
+          warn
+        />
+      </div>
+      <p className="text-xs text-gray-500 mt-4 border-t border-gray-800 pt-3">
+        The gap between coverage and displacement risk is the policy problem UNMAPPED addresses.
+        This is not a marginal efficiency issue. It is a structural one.
+      </p>
+    </div>
+  );
+}
+
+function BarRow({ label, pct, color, source, note, warn }) {
+  const [animated, setAnimated] = useState(0);
+  useEffect(() => {
+    setTimeout(() => setAnimated(pct), 100);
+  }, [pct]);
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-1">
+        <Tooltip label={label} source={source}>
+          <span className={`text-sm ${warn ? "text-yellow-400" : "text-gray-300"}`}>{label}</span>
+        </Tooltip>
+        <span className="text-sm mono text-gray-400">{pct.toFixed(1)}%</span>
+      </div>
+      <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
+        <div
+          className={`h-full ${color} rounded-full bar-fill`}
+          style={{ width: `${animated}%` }}
+        />
+      </div>
+      <div className="text-xs text-gray-600 mt-1">{note}</div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Skills Gap Map
+// ──────────────────────────────────────────────────────────────────────────
+function SkillsGapMap({ catalog, preset }) {
+  if (!catalog || !catalog.opportunities) return null;
+
+  const opps = catalog.opportunities;
+  const totalOpenings = opps.reduce((s, o) => s + (o.openings_estimate || 0), 0);
+
+  // Aggregate skills demand
+  const skillDemand = {};
+  opps.forEach(o => {
+    (o.required_skills || []).forEach(s => {
+      skillDemand[s.label] = (skillDemand[s.label] || 0) + (o.openings_estimate || 0);
+    });
+  });
+  const topSkills = Object.entries(skillDemand)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  const maxDemand = topSkills[0]?.[1] || 1;
+
+  // Sector breakdown
+  const sectorData = {};
+  opps.forEach(o => {
+    if (!sectorData[o.sector]) sectorData[o.sector] = { openings: 0, growth: [], wages: [] };
+    sectorData[o.sector].openings += o.openings_estimate || 0;
+    if (o.growth_pct_yr) sectorData[o.sector].growth.push(o.growth_pct_yr);
+    if (o.wage_month) sectorData[o.sector].wages.push(o.wage_month);
+  });
+
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5 mb-6 fade-in">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider">
+          Skills Demand Map — {preset.name}
+        </h3>
+        <Tooltip label="Total estimated job openings across all sectors" source={catalog.data_note}>
+          <span className="text-xs mono text-blue-400 border border-blue-800 rounded px-2 py-1">
+            {fmt(totalOpenings)} openings tracked
+          </span>
+        </Tooltip>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Skills demand bars */}
+        <div>
+          <h4 className="text-xs text-gray-500 uppercase mb-3">Most demanded skills</h4>
+          <div className="space-y-2">
+            {topSkills.map(([skill, count]) => (
+              <div key={skill}>
+                <div className="flex justify-between text-xs mb-1">
+                  <span className="text-gray-300 truncate mr-2">{skill}</span>
+                  <span className="mono text-gray-500 shrink-0">{fmt(count)}</span>
+                </div>
+                <div className="h-1.5 bg-gray-800 rounded-full overflow-hidden">
+                  <SkillBar pct={(count / maxDemand) * 100} />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Sector table */}
+        <div>
+          <h4 className="text-xs text-gray-500 uppercase mb-3">Sector opportunity index</h4>
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs">
+              <thead>
+                <tr className="text-gray-600 border-b border-gray-800">
+                  <th className="text-left pb-2 font-medium">Sector</th>
+                  <th className="text-right pb-2 font-medium">Openings</th>
+                  <th className="text-right pb-2 font-medium">Avg Growth</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(sectorData)
+                  .sort((a, b) => b[1].openings - a[1].openings)
+                  .map(([sector, data]) => {
+                    const avgGrowth = data.growth.length
+                      ? (data.growth.reduce((a, b) => a + b) / data.growth.length).toFixed(0)
+                      : "–";
+                    const growthColor = Number(avgGrowth) > 20
+                      ? "text-green-400" : Number(avgGrowth) > 10
+                      ? "text-yellow-400" : "text-gray-400";
+                    return (
+                      <tr key={sector} className="border-b border-gray-900">
+                        <td className="py-2 text-gray-300 capitalize">{sector.replace(/_/g, " ")}</td>
+                        <td className="py-2 text-right mono text-gray-400">{fmt(data.openings)}</td>
+                        <td className={`py-2 text-right mono ${growthColor}`}>
+                          {avgGrowth !== "–" ? `+${avgGrowth}%` : "–"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SkillBar({ pct }) {
+  const [w, setW] = useState(0);
+  useEffect(() => { setTimeout(() => setW(pct), 150); }, [pct]);
+  return (
+    <div
+      className="h-full bg-gradient-to-r from-blue-600 to-blue-400 rounded-full bar-fill"
+      style={{ width: `${w}%` }}
+    />
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Cost of Inaction Calculator
+// ──────────────────────────────────────────────────────────────────────────
+function CostOfInaction({ preset }) {
+  const [pop, setPop] = useState(preset.unmapped);
+  const [reach, setReach] = useState(preset.reach);
+  const [riskPct, setRiskPct] = useState(Math.round(preset.displacement_risk * 100));
+  const [gdp, setGdp] = useState(preset.gdp_per_worker_usd);
+  const [years, setYears] = useState(5);
+
+  useEffect(() => {
+    setPop(preset.unmapped);
+    setReach(preset.reach);
+    setRiskPct(Math.round(preset.displacement_risk * 100));
+    setGdp(preset.gdp_per_worker_usd);
+  }, [preset]);
+
+  const displaced = Math.round(pop * (riskPct / 100));
+  const unreached = pop - reach;
+  const atRiskUnreached = Math.round(unreached * (riskPct / 100));
+  const costUSD = atRiskUnreached * gdp * years;
+  const coveragePct = (reach / pop * 100).toFixed(1);
+
+  const severityColor = costUSD > 50_000_000 ? "text-red-400" :
+                        costUSD > 20_000_000 ? "text-orange-400" : "text-yellow-400";
+
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5 mb-6 fade-in">
+      <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+        Cost of Inaction Calculator
+      </h3>
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Sliders */}
+        <div className="space-y-4">
+          <Slider label="Unmapped workers" value={pop} onChange={setPop}
+            min={5000} max={200000} step={1000}
+            source="ILO / national household surveys" />
+          <Slider label="Currently reached" value={reach} onChange={setReach}
+            min={100} max={pop} step={100}
+            source="Government program enrollment data" />
+          <Slider label="Displacement risk %" value={riskPct} onChange={setRiskPct}
+            min={5} max={60} step={1} suffix="%"
+            source="Frey-Osborne calibrated to LMIC context (UNMAPPED model)" />
+          <Slider label="Productivity/worker/yr (USD)" value={gdp} onChange={setGdp}
+            min={500} max={5000} step={100} prefix="$"
+            source="World Bank Enterprise Surveys, ILO informal economy" />
+          <Slider label="Projection horizon (years)" value={years} onChange={setYears}
+            min={1} max={10} step={1} suffix=" yr"
+            source="Policy planning horizon" />
+        </div>
+
+        {/* Result */}
+        <div className="flex flex-col justify-center">
+          <div className="bg-gray-950 border border-gray-700 rounded-lg p-5 text-center">
+            <div className="text-xs text-gray-500 uppercase tracking-wider mb-2">
+              Estimated Cost of Inaction
+            </div>
+            <div className={`text-4xl font-bold mono mb-1 ${severityColor}`}>
+              ${(costUSD / 1_000_000).toFixed(1)}M
+            </div>
+            <div className="text-xs text-gray-500 mb-4">USD over {years} years</div>
+
+            <div className="text-left space-y-2 text-xs border-t border-gray-800 pt-4">
+              <ResultRow label="Coverage rate" value={`${coveragePct}%`} warn={Number(coveragePct) < 10} />
+              <ResultRow label="Unreached workers" value={fmt(unreached)} warn />
+              <ResultRow label="At risk + unreached" value={fmt(atRiskUnreached)} warn />
+              <ResultRow label="Lost GDP (full period)" value={fmtUSD(costUSD)} warn />
+            </div>
+          </div>
+          <p className="text-xs text-gray-600 mt-3 leading-relaxed">
+            Methodology: (unreached × displacement_risk × productivity × years).
+            Does not include social costs, healthcare, or political stability effects.
+            Sources: World Bank Enterprise Surveys + ILO informal economy + UNMAPPED calibration model.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Slider({ label, value, onChange, min, max, step, prefix="", suffix="", source }) {
+  return (
+    <div>
+      <div className="flex justify-between mb-1">
+        <Tooltip label={label} source={source}>
+          <span className="text-xs text-gray-400">{label}</span>
+        </Tooltip>
+        <span className="text-xs mono text-gray-300">{prefix}{fmt(value)}{suffix}</span>
+      </div>
+      <input
+        type="range" min={min} max={max} step={step} value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        className="w-full h-1.5 bg-gray-700 rounded-full appearance-none cursor-pointer accent-blue-500"
+      />
+    </div>
+  );
+}
+
+function ResultRow({ label, value, warn }) {
+  return (
+    <div className="flex justify-between">
+      <span className="text-gray-500">{label}</span>
+      <span className={`mono font-medium ${warn ? "text-red-400" : "text-gray-300"}`}>{value}</span>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Opportunity Catalog Table
+// ──────────────────────────────────────────────────────────────────────────
+function OpportunityCatalog({ catalog }) {
+  if (!catalog || !catalog.opportunities) return null;
+
+  const opps = [...catalog.opportunities].sort((a, b) => (b.growth_pct_yr || 0) - (a.growth_pct_yr || 0));
+
+  return (
+    <div className="bg-gray-900/60 border border-gray-800 rounded-lg p-5 mb-6 fade-in">
+      <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">
+        Opportunity Catalog — {catalog.country}
+        <span className="ml-2 text-blue-400 normal-case font-normal text-xs">
+          ({catalog.total} opportunities)
+        </span>
+      </h3>
+      <div className="overflow-x-auto">
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="text-gray-600 border-b border-gray-800">
+              <th className="text-left pb-2 font-medium">Opportunity</th>
+              <th className="text-left pb-2 font-medium">Sector</th>
+              <th className="text-right pb-2 font-medium">Wage/mo</th>
+              <th className="text-right pb-2 font-medium">Training</th>
+              <th className="text-right pb-2 font-medium">Openings</th>
+              <th className="text-right pb-2 font-medium">Growth</th>
+              <th className="text-right pb-2 font-medium">Auto Risk</th>
+            </tr>
+          </thead>
+          <tbody>
+            {opps.map(o => {
+              const growthColor = o.growth_pct_yr > 25 ? "text-green-400" :
+                                  o.growth_pct_yr > 10 ? "text-yellow-400" : "text-gray-400";
+              const riskColor   = o.automation_risk_calibrated < 0.2 ? "text-green-400" :
+                                  o.automation_risk_calibrated < 0.4 ? "text-yellow-400" : "text-red-400";
+              return (
+                <tr key={o.id} className="border-b border-gray-900 hover:bg-gray-800/30">
+                  <td className="py-2 pr-2">
+                    <div className="text-gray-200 font-medium">{o.title}</div>
+                    <div className="text-gray-600 mt-0.5">{o.employer_type}</div>
+                  </td>
+                  <td className="py-2 text-gray-400 capitalize">{o.sector?.replace(/_/g, " ")}</td>
+                  <td className="py-2 text-right mono text-gray-300">
+                    <Tooltip label="Monthly wage estimate" source={o.wage_source}>
+                      {fmt(o.wage_month)} {o.currency}
+                    </Tooltip>
+                  </td>
+                  <td className="py-2 text-right mono text-gray-400">
+                    <Tooltip label="Training gap" source={o.training_source}>
+                      {o.training_gap_months}mo
+                    </Tooltip>
+                  </td>
+                  <td className="py-2 text-right mono text-blue-400">
+                    <Tooltip label="Estimated current openings" source={o.openings_source}>
+                      {fmt(o.openings_estimate)}
+                    </Tooltip>
+                  </td>
+                  <td className={`py-2 text-right mono ${growthColor}`}>
+                    <Tooltip label="Annual sector growth rate" source={o.growth_source}>
+                      {o.growth_pct_yr != null ? `+${o.growth_pct_yr}%` : "–"}
+                    </Tooltip>
+                  </td>
+                  <td className={`py-2 text-right mono ${riskColor}`}>
+                    <Tooltip label="Automation risk calibrated to LMIC context" source="Frey-Osborne + UNMAPPED calibration">
+                      {o.automation_risk_calibrated != null
+                        ? `${(o.automation_risk_calibrated * 100).toFixed(0)}%`
+                        : "–"}
+                    </Tooltip>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <p className="text-xs text-gray-600 mt-3">{catalog.data_note}</p>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Data Gaps Panel — honest disclosures
+// ──────────────────────────────────────────────────────────────────────────
+function DataGapsPanel({ gaps }) {
+  if (!gaps || gaps.length === 0) return null;
+  return (
+    <div className="bg-gray-900/40 border border-gray-800 rounded-lg p-5 mb-6 fade-in">
+      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+        <span>⚠</span> Known Data Gaps
+      </h3>
+      <p className="text-xs text-gray-600 mb-3">
+        UNMAPPED discloses every gap in its data. These are not excuses — they are signals for where better data investment is needed.
+      </p>
+      <div className="space-y-2">
+        {gaps.map((g, i) => (
+          <div key={i} className="flex items-start gap-2 text-xs">
+            <span className="text-yellow-600 shrink-0 mt-0.5">◆</span>
+            <div>
+              <span className="text-gray-400">{g.description || g}</span>
+              {g.affects && <span className="text-gray-600 ml-2">({g.affects})</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Country Switcher
+// ──────────────────────────────────────────────────────────────────────────
+function CountrySwitcher({ active, onChange }) {
+  return (
+    <div className="flex gap-2">
+      {Object.entries(COUNTRY_PRESETS).map(([key, p]) => (
+        <button
+          key={key}
+          onClick={() => onChange(key)}
+          className={`
+            country-switch flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium border
+            ${active === key
+              ? "border-blue-600 bg-blue-900/40 text-blue-300"
+              : "border-gray-700 bg-gray-900/40 text-gray-400 hover:border-gray-600 hover:text-gray-300"
+            }
+          `}
+        >
+          <span>{p.flag}</span>
+          <span>{p.name}</span>
+          {active === key && <span className="text-xs text-blue-500">● active</span>}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+// ──────────────────────────────────────────────────────────────────────────
+// Root App
+// ──────────────────────────────────────────────────────────────────────────
+function App() {
+  const [activeCountry, setActiveCountry] = useState("ghana");
+  const [catalog, setCatalog] = useState(null);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [swapAnim, setSwapAnim] = useState(false);
+  const [activeTab, setActiveTab] = useState("district");
+
+  const preset = COUNTRY_PRESETS[activeCountry];
+
+  const load = useCallback(async (country) => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Fetch catalog and district stats in parallel
+      const [catRes, statRes] = await Promise.all([
+        fetch(`${API}/matching/catalog`).then(r => r.ok ? r.json() : null),
+        fetch(
+          `${API}/matching/district_stats?district_pop_unmapped=${COUNTRY_PRESETS[country].unmapped}` +
+          `&policy_reach=${COUNTRY_PRESETS[country].reach}` +
+          `&displacement_risk_pct=${COUNTRY_PRESETS[country].displacement_risk}`
+        ).then(r => r.ok ? r.json() : null),
+      ]);
+      setCatalog(catRes);
+      setStats(statRes);
+    } catch (e) {
+      setError("Could not reach UNMAPPED API. Make sure the backend is running.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { load(activeCountry); }, [activeCountry]);
+
+  const handleCountrySwitch = (country) => {
+    setSwapAnim(true);
+    setTimeout(() => {
+      setActiveCountry(country);
+      setSwapAnim(false);
+    }, 300);
+  };
+
+  const tabs = [
+    { id: "district",   label: "District View",         icon: "📍" },
+    { id: "skills_gap", label: "Skills Gap Map",         icon: "🗺" },
+    { id: "inaction",   label: "Cost of Inaction",       icon: "💸" },
+    { id: "catalog",    label: "Opportunity Catalog",    icon: "📋" },
+  ];
+
+  return (
+    <div className="min-h-screen" style={{background:"#0a0a0f"}}>
+      {/* Header */}
+      <header className="border-b border-gray-800 bg-gray-950/80 backdrop-blur sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div>
+                <div className="text-white font-bold tracking-tight text-lg">UNMAPPED</div>
+                <div className="text-xs text-gray-500 mono">policymaker view</div>
+              </div>
+              <div className="hidden md:block h-8 w-px bg-gray-800" />
+              <div className="hidden md:flex items-center gap-2">
+                <span className="text-xs text-gray-500">Active country:</span>
+                <span className="text-xs font-medium text-gray-300 flex items-center gap-1">
+                  {preset.flag} {preset.name}
+                  <span className="mono text-gray-600 ml-1">({preset.iso})</span>
+                </span>
+              </div>
+            </div>
+            <CountrySwitcher active={activeCountry} onChange={handleCountrySwitch} />
+          </div>
+        </div>
+      </header>
+
+      {/* Country swap flash */}
+      {swapAnim && (
+        <div className="fixed inset-0 bg-blue-900/20 z-50 pointer-events-none transition-opacity duration-300" />
+      )}
+
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        {/* Tab nav */}
+        <div className="flex gap-1 mb-6 border-b border-gray-800 pb-0">
+          {tabs.map(t => (
+            <button
+              key={t.id}
+              onClick={() => setActiveTab(t.id)}
+              className={`
+                flex items-center gap-2 px-4 py-2.5 text-sm border-b-2 transition-colors
+                ${activeTab === t.id
+                  ? "border-blue-500 text-blue-400 font-medium"
+                  : "border-transparent text-gray-500 hover:text-gray-300"
+                }
+              `}
+            >
+              <span>{t.icon}</span> {t.label}
+            </button>
+          ))}
+        </div>
+
+        {loading && (
+          <div className="text-center py-12 text-gray-600">
+            <div className="text-2xl mb-2">⌛</div>
+            <div className="text-sm">Loading {preset.name} data...</div>
+          </div>
+        )}
+
+        {error && (
+          <div className="border border-red-900 bg-red-950/20 rounded-lg p-4 text-red-400 text-sm mb-6">
+            <strong>API connection failed.</strong> {error}
+            <div className="text-xs text-red-600 mt-1 mono">
+              Expected: {API}
+            </div>
+            <div className="text-xs text-gray-500 mt-2">
+              Dashboard is showing preset data. Start backend with:
+              <span className="mono text-gray-400 ml-1">ACTIVE_COUNTRY={activeCountry} uvicorn backend.main:app --reload</span>
+            </div>
+          </div>
+        )}
+
+        {!loading && (
+          <div key={`${activeCountry}-${activeTab}`} className="fade-in">
+            {activeTab === "district" && (
+              <>
+                <DistrictHeader preset={preset} stats={stats} />
+                <CoverageGapBar preset={preset} />
+                {stats && <DataGapsPanel gaps={stats.data_gaps} />}
+              </>
+            )}
+            {activeTab === "skills_gap" && (
+              <SkillsGapMap catalog={catalog} preset={preset} />
+            )}
+            {activeTab === "inaction" && (
+              <CostOfInaction preset={preset} />
+            )}
+            {activeTab === "catalog" && (
+              <OpportunityCatalog catalog={catalog} />
+            )}
+          </div>
+        )}
+
+        {/* Footer */}
+        <footer className="border-t border-gray-900 mt-8 pt-4 text-xs text-gray-700">
+          <div className="flex flex-wrap gap-4 justify-between">
+            <div>
+              <strong className="text-gray-600">UNMAPPED</strong> — Open Skills Infrastructure.
+              Built for World Bank Youth Summit Challenge 05 × MIT Club of Northern California × MIT Club of Germany.
+            </div>
+            <div className="mono">
+              Country config: {preset.iso} |
+              Informal share: {(preset.informal_share * 100).toFixed(0)}% |
+              Stack: FastAPI + Groq Llama 3.1 + ESCO + ILOSTAT + WDI
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>

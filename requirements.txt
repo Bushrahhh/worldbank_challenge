@@ -17,10 +17,12 @@ groq==0.12.0           # Groq API — Llama 3.1 70B + Whisper
 # ollama==0.3.3        # production fallback — uncomment when needed
 
 # ── Telegram bot ─────────────────────────────────────────────────────────────
-python-telegram-bot==21.6
+python-telegram-bot[job-queue]==21.6
+apscheduler==3.10.4        # monthly check-in scheduler (PTB JobQueue backend)
 
 # ── Data ─────────────────────────────────────────────────────────────────────
 httpx==0.27.2          # async HTTP for data adapters
+certifi>=2024.0.0      # up-to-date SSL certificates for Windows
 pandas==2.2.3          # Frey-Osborne + Wittgenstein CSV processing
 numpy==2.1.3
 

@@ -415,10 +415,13 @@
     <button class="back-btn" onclick="window.history.back()">← Back</button>
   </div>
   <div class="tabs">
-    <div class="tab active" data-panel="calibration">Calibration</div>
-    <div class="tab" data-panel="weather">Weather</div>
-    <div class="tab" data-panel="timemachine">Time Machine</div>
-    <div class="tab" data-panel="constellation">Constellation</div>
+    <div class="tab active" data-panel="calibration">Risk</div>
+    <div class="tab" data-panel="weather">Forecast</div>
+    <div class="tab" data-panel="timemachine">2035</div>
+    <div class="tab" data-panel="constellation">Map</div>
+    <div class="tab" data-panel="matches">Matches</div>
+    <div class="tab" data-panel="roadmap">Roadmap</div>
+    <div class="tab" data-panel="wages">Wages</div>
   </div>
 </div>
 
@@ -452,12 +455,21 @@
   // ── Data loading ───────────────────────────────────────────────────────────
   async function loadAll() {
     try {
-      const [profileRes, tmRes] = await Promise.all([
+      const fetches = [
         passportId
           ? fetch(`${API_BASE}/readiness/profile/${passportId}`)
           : fetch(`${API_BASE}/readiness/calibration/${iscoParam}`),
         fetch(`${API_BASE}/readiness/time_machine`),
-      ]);
+      ];
+      if (passportId) {
+        fetches.push(fetch(`${API_BASE}/matching/match/${passportId}`, {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({top_n:4, fetch_econ_signals:true, include_wrong_job:true})}));
+        fetches.push(fetch(`${API_BASE}/readiness/roadmap/${passportId}`));
+      } else {
+        fetches.push(fetch(`${API_BASE}/matching/catalog`));
+        fetches.push(fetch(`${API_BASE}/readiness/roadmap/isco/${iscoParam}`));
+      }
+
+      const [profileRes, tmRes, matchRes, roadmapRes] = await Promise.all(fetches);
 
       if (passportId) {
         DATA.profile = await profileRes.json();
@@ -470,6 +482,8 @@
         DATA.constellation = { nodes: [], edges: [], summary: {} };
       }
       DATA.timeMachine = await tmRes.json();
+      DATA.matches = matchRes.ok ? await matchRes.json() : null;
+      DATA.roadmap  = roadmapRes.ok ? await roadmapRes.json() : null;
 
       renderAll();
     } catch (e) {
@@ -481,13 +495,174 @@
   // ── Render all panels ──────────────────────────────────────────────────────
   function renderAll() {
     document.getElementById('app').innerHTML = `
-      <div id="panel-calibration" class="panel active">${renderCalibration()}</div>
-      <div id="panel-weather"     class="panel">${renderWeather()}</div>
-      <div id="panel-timemachine" class="panel">${renderTimeMachine()}</div>
+      <div id="panel-calibration"  class="panel active">${renderCalibration()}</div>
+      <div id="panel-weather"      class="panel">${renderWeather()}</div>
+      <div id="panel-timemachine"  class="panel">${renderTimeMachine()}</div>
       <div id="panel-constellation" class="panel">${renderConstellation()}</div>
+      <div id="panel-matches"      class="panel">${renderMatches()}</div>
+      <div id="panel-roadmap"      class="panel">${renderRoadmap()}</div>
+      <div id="panel-wages"        class="panel">${renderWages()}</div>
     `;
     drawConstellationSVG();
     animateBars();
+  }
+
+  // ── Matches Panel ──────────────────────────────────────────────────────────
+  function renderMatches() {
+    const m = DATA.matches;
+    if (!m || !m.matches || m.matches.length === 0) {
+      return `<div class="section-title">Opportunity Matches</div>
+        <div class="card"><p style="color:#8b949e;font-size:13px;">Complete your skills interview first to see personalised matches.</p></div>`;
+    }
+    const currency = m.currency || '';
+    let html = `<div class="section-title">Your Best Matches</div>`;
+
+    m.matches.forEach((opp, i) => {
+      const scoreColor = opp.score > 0.7 ? '#3fb950' : opp.score > 0.5 ? '#d29922' : '#8b949e';
+      const riskPct = opp.automation_risk_calibrated != null ? Math.round(opp.automation_risk_calibrated * 100) + '%' : '–';
+      const riskColor = opp.automation_risk_calibrated < 0.25 ? '#3fb950' : opp.automation_risk_calibrated < 0.5 ? '#d29922' : '#f85149';
+      const econ = opp.econ_signals || {};
+
+      html += `<div class="card" style="margin-bottom:12px;border-left:3px solid ${scoreColor}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
+          <div style="font-weight:700;font-size:14px;color:#e8eaed">${opp.title}</div>
+          <div style="font-size:11px;color:${scoreColor};font-weight:600;white-space:nowrap;margin-left:8px">${Math.round(opp.score*100)}% match</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px">
+          <div style="background:#1a1d27;border-radius:6px;padding:6px">
+            <div style="font-size:10px;color:#8b949e;margin-bottom:2px">Training needed</div>
+            <div style="font-size:13px;font-weight:600;color:#e8eaed">${opp.training_gap_months} month${opp.training_gap_months !== 1 ? 's' : ''}</div>
+          </div>
+          <div style="background:#1a1d27;border-radius:6px;padding:6px">
+            <div style="font-size:10px;color:#8b949e;margin-bottom:2px">Income</div>
+            <div style="font-size:13px;font-weight:600;color:#3fb950">${opp.income_multiple != null ? opp.income_multiple + '×' : '–'} current</div>
+          </div>
+          <div style="background:#1a1d27;border-radius:6px;padding:6px">
+            <div style="font-size:10px;color:#8b949e;margin-bottom:2px">Openings</div>
+            <div style="font-size:13px;font-weight:600;color:#e8eaed">${(opp.openings_estimate||0).toLocaleString()}</div>
+          </div>
+          <div style="background:#1a1d27;border-radius:6px;padding:6px">
+            <div style="font-size:10px;color:#8b949e;margin-bottom:2px">Auto risk</div>
+            <div style="font-size:13px;font-weight:600;color:${riskColor}">${riskPct}</div>
+          </div>
+        </div>
+        ${econ.wage_floor ? `<div style="font-size:11px;color:#8b949e;margin-bottom:4px">
+          💰 Wage floor: <span style="color:#e8eaed">${econ.wage_floor.toLocaleString()} ${econ.wage_floor_currency||currency}/mo</span>
+          <span style="color:#58a6ff"> · ${econ.wage_floor_source||'ILOSTAT'}</span>
+        </div>` : ''}
+        ${econ.sector_growth_text ? `<div style="font-size:11px;color:#8b949e;margin-bottom:4px">
+          📈 ${econ.sector_growth_text}
+        </div>` : ''}
+        <div style="font-size:12px;color:#8b949e;margin-top:6px;font-style:italic">${opp.why_good||''}</div>
+        ${opp.wrong_if ? `<div style="font-size:11px;color:#d29922;margin-top:6px">⚠ ${opp.wrong_if}</div>` : ''}
+        ${opp.skill_gaps && opp.skill_gaps.length ? `<div style="font-size:11px;color:#8b949e;margin-top:4px">Gaps to close: ${opp.skill_gaps.map(g=>g.skill).join(', ')}</div>` : ''}
+        <div style="font-size:10px;color:#484f58;margin-top:4px">Sources: ${opp.sources ? Object.values(opp.sources).filter(Boolean).slice(0,2).join(' · ') : ''}</div>
+      </div>`;
+    });
+
+    if (m.wrong_job) {
+      const wj = m.wrong_job;
+      html += `<div class="section-title" style="margin-top:16px">One We Set Aside</div>
+        <div class="card" style="border-left:3px solid #f85149;opacity:0.85">
+          <div style="font-size:12px;color:#f85149;font-weight:600;margin-bottom:6px">✗ ${wj.title}</div>
+          <div style="font-size:12px;color:#8b949e">${wj.explanation||wj.wrong_if_raw||''}</div>
+          <div style="font-size:10px;color:#484f58;margin-top:6px">Skill overlap: ${wj.skill_overlap_pct||'–'}% · A system that says no earns trust when it says yes.</div>
+        </div>`;
+    }
+
+    html += `<div style="font-size:10px;color:#484f58;margin-top:12px;padding:0 4px">${m.data_note||''}</div>`;
+    return html;
+  }
+
+  // ── Roadmap Panel ──────────────────────────────────────────────────────────
+  function renderRoadmap() {
+    const r = DATA.roadmap;
+    if (!r || !r.steps || r.steps.length === 0) {
+      return `<div class="section-title">Upskilling Roadmap</div>
+        <div class="card"><p style="color:#8b949e;font-size:13px;">Complete your skills interview to get a personalised roadmap.</p></div>`;
+    }
+
+    const urgencyColor = r.urgency === 'high' ? '#f85149' : r.urgency === 'medium' ? '#d29922' : '#3fb950';
+    let html = `
+      <div class="section-title">Your 3-Step Roadmap</div>
+      <div class="card" style="border-left:3px solid ${urgencyColor};margin-bottom:16px">
+        <div style="font-size:13px;color:#e8eaed;font-weight:600">${r.headline||''}</div>
+        <div style="font-size:12px;color:#8b949e;margin-top:6px">${r.urgency_text||''}</div>
+      </div>`;
+
+    (r.steps || []).forEach(step => {
+      html += `<div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+          <div style="background:#1158c7;color:#fff;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${step.step}</div>
+          <div style="font-weight:700;font-size:14px;color:#e8eaed">${step.title}</div>
+        </div>
+        <div style="font-size:12px;color:#8b949e;margin-bottom:10px">${step.why}</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap">
+          <span style="background:#1a1d27;border-radius:12px;padding:3px 10px;font-size:11px;color:#58a6ff">⏱ ${step.months_to_complete} month${step.months_to_complete !== 1 ? 's' : ''}</span>
+          <span style="background:#1a1d27;border-radius:12px;padding:3px 10px;font-size:11px;color:#3fb950">📈 ${step.income_uplift_note}</span>
+        </div>
+        ${(step.resources||[]).map(res => `
+          <div style="background:#161b22;border:1px solid #2a2d36;border-radius:6px;padding:8px;margin-bottom:6px">
+            <div style="font-size:12px;font-weight:600;color:#e8eaed;margin-bottom:3px">${res.name}</div>
+            <div style="font-size:11px;color:#8b949e;margin-bottom:3px">${res.access}</div>
+            <div style="display:flex;gap:8px">
+              <span style="font-size:10px;color:#3fb950">${res.cost}</span>
+              <span style="font-size:10px;color:#8b949e">· ${res.duration}</span>
+              ${res.mobile_ok ? '<span style="font-size:10px;color:#58a6ff">· 📱 Mobile-friendly</span>' : ''}
+            </div>
+          </div>`).join('')}
+      </div>`;
+    });
+
+    html += `<div style="font-size:10px;color:#484f58;margin-top:8px;padding:0 4px">${r.data_note||''}</div>`;
+    return html;
+  }
+
+  // ── Wages Panel ────────────────────────────────────────────────────────────
+  function renderWages() {
+    const m = DATA.matches;
+    if (!m || !m.matches) {
+      return `<div class="section-title">Live Wage & Growth Data</div>
+        <div class="card"><p style="color:#8b949e;font-size:13px;">Complete your skills interview to see personalised wage data.</p></div>`;
+    }
+
+    let html = `<div class="section-title">Live Wage & Sector Data</div>
+      <div style="font-size:11px;color:#8b949e;margin-bottom:12px;padding:0 4px">
+        Sources: ILOSTAT statutory wage floors · World Bank WDI sector employment growth.<br>
+        All data is cited. Hover or tap a source to verify.
+      </div>`;
+
+    const opps = m.matches || [];
+    opps.forEach(opp => {
+      const econ = opp.econ_signals || {};
+      if (!econ.wage_floor && !econ.sector_growth_pct) return;
+      html += `<div class="card" style="margin-bottom:12px">
+        <div style="font-weight:600;font-size:13px;color:#e8eaed;margin-bottom:10px">${opp.title}</div>
+        ${econ.wage_floor != null ? `
+          <div style="margin-bottom:10px">
+            <div style="font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">ILOSTAT Wage Floor</div>
+            <div style="font-size:20px;font-weight:700;color:#3fb950">${econ.wage_floor.toLocaleString()} ${econ.wage_floor_currency||''}<span style="font-size:12px;font-weight:400;color:#8b949e">/mo</span></div>
+            <div style="font-size:11px;color:#58a6ff;margin-top:2px">Source: ${econ.wage_floor_source||'ILOSTAT'}</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:4px">${econ.vs_floor_text||''}</div>
+          </div>` : ''}
+        ${econ.sector_growth_pct != null ? `
+          <div>
+            <div style="font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:4px">Sector Growth (WDI)</div>
+            <div style="font-size:20px;font-weight:700;color:${econ.sector_growth_pct > 0 ? '#3fb950' : '#f85149'}">
+              ${econ.sector_growth_pct > 0 ? '+' : ''}${econ.sector_growth_pct}%<span style="font-size:12px;font-weight:400;color:#8b949e"> per year</span>
+            </div>
+            <div style="font-size:11px;color:#58a6ff;margin-top:2px">Source: ${econ.sector_growth_source||'World Bank WDI'}</div>
+            <div style="font-size:11px;color:#8b949e;margin-top:4px">${econ.sector_growth_text||''}</div>
+          </div>` : ''}
+      </div>`;
+    });
+
+    if (!opps.some(o => o.econ_signals && (o.econ_signals.wage_floor || o.econ_signals.sector_growth_pct))) {
+      html += `<div class="card"><p style="color:#8b949e;font-size:12px;">Live wage data could not be fetched. Check network connection and try again.</p></div>`;
+    }
+
+    html += `<div style="font-size:10px;color:#484f58;margin-top:8px;padding:0 4px">${m.data_note||''}</div>`;
+    return html;
   }
 
   // ── Calibration Panel ──────────────────────────────────────────────────────

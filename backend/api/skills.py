@@ -281,6 +281,44 @@ async def get_passport_by_user(
     }
 
 
+@router.get("/users_with_passports")
+async def users_with_passports(db: AsyncSession = Depends(get_db)):
+    """
+    Return all users who have at least one Skills Passport.
+    Used by the monthly check-in job to send nudge messages.
+    """
+    result = await db.execute(
+        select(User, SkillsPassport)
+        .join(SkillsPassport, SkillsPassport.user_id == User.id)
+        .where(User.telegram_id.isnot(None))
+        .order_by(SkillsPassport.issued_at.desc())
+    )
+    rows = result.unique().all()
+
+    seen_users: set[int] = set()
+    output = []
+    for user, passport in rows:
+        if user.id in seen_users:
+            continue
+        seen_users.add(user.id)
+
+        receipt_result = await db.execute(
+            select(SkillReceipt).where(SkillReceipt.passport_id == passport.id)
+        )
+        skill_count = len(receipt_result.scalars().all())
+
+        output.append({
+            "telegram_id": user.telegram_id,
+            "display_name": user.display_name,
+            "passport_uuid": passport.passport_uuid,
+            "country_iso": passport.country_iso,
+            "skill_count": skill_count,
+            "last_updated": passport.updated_at.isoformat() + "Z",
+        })
+
+    return output
+
+
 @router.get("/passport/{passport_uuid}")
 async def get_passport(
     passport_uuid: str,
@@ -395,6 +433,76 @@ async def list_heritage_skills():
             }
             for hs in HERITAGE_SKILLS
         ],
+    }
+
+
+@router.post("/scan_certificate")
+async def scan_certificate_endpoint(
+    file: UploadFile = File(...),
+    passport_uuid: Optional[str] = None,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Upload a photo of a paper credential — Gemini Flash reads it and extracts
+    structured credential data, which is converted into skill receipts.
+
+    Accepts: JPEG, PNG, WebP images.
+    Returns: scan result + list of receipts added to the passport.
+
+    Graceful degradation: if GEMINI_API_KEY is not set, returns a clear
+    data-gap disclosure rather than an error.
+    """
+    from backend.modules.skills_signal.certificate_scanner import (
+        scan_certificate,
+        build_receipts_from_scan,
+    )
+
+    content_type = file.content_type or "image/jpeg"
+    if not content_type.startswith("image/"):
+        raise HTTPException(400, "Only image files are supported (JPEG, PNG, WebP).")
+
+    image_bytes = await file.read()
+    if len(image_bytes) > 10 * 1024 * 1024:
+        raise HTTPException(400, "Image too large. Maximum 10MB.")
+
+    scan_result = await scan_certificate(image_bytes, content_type)
+    receipts = build_receipts_from_scan(scan_result)
+
+    saved_receipts = []
+    if receipts and passport_uuid:
+        result = await db.execute(
+            select(SkillsPassport).where(SkillsPassport.passport_uuid == passport_uuid)
+        )
+        passport = result.scalar_one_or_none()
+        if passport:
+            for r in receipts:
+                row = SkillReceipt(
+                    passport_id=passport.id,
+                    skill_label=r["skill_label"],
+                    esco_code=r.get("esco_code"),
+                    isco_code=r.get("isco_code"),
+                    evidence_type=r.get("evidence_type", "assessed"),
+                    confidence=r.get("confidence", 0.5),
+                    verified_by=r.get("verified_by"),
+                    is_heritage_skill=False,
+                    evidence_text=r.get("evidence_text"),
+                )
+                db.add(row)
+                saved_receipts.append(r["skill_label"])
+            await db.commit()
+
+    return {
+        "scan_ok": scan_result.get("_scan_ok", False),
+        "source": "Gemini Flash 1.5",
+        "scan_result": scan_result,
+        "receipts_extracted": len(receipts),
+        "receipts_saved": len(saved_receipts),
+        "saved_skills": saved_receipts,
+        "data_note": (
+            "Certificate scan uses Gemini Flash vision model. "
+            "Confidence depends on image quality. "
+            "Scan results are labeled 'assessed' evidence — below peer-vouched and employer-verified."
+        ),
     }
 
 

@@ -11,7 +11,8 @@ from telegram.ext import ContextTypes
 
 logger = logging.getLogger(__name__)
 
-API_BASE = "http://localhost:8000"
+import os
+API_BASE = os.environ.get("API_BASE_URL", "http://localhost:8000")
 
 
 async def show_passport(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:

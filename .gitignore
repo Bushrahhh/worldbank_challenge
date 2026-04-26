@@ -47,3 +47,11 @@ Thumbs.db
 # Secrets
 *.pem
 *.key
+
+# Claude memory
+.claude/
+
+# Local env overrides
+.env.local
+.env.production
+.env.development

@@ -21,6 +21,7 @@ from backend.modules.readiness.frey_calibrator import get_calibration, get_passp
 from backend.modules.readiness.weather_report import generate_weather_report, generate_passport_weather
 from backend.modules.readiness.time_machine import build_time_machine
 from backend.modules.readiness.constellation import build_constellation
+from backend.modules.readiness.upskill_roadmap import build_roadmap
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -103,6 +104,41 @@ async def constellation(
     """
     receipts = await _get_receipts(db, passport_uuid)
     return build_constellation(receipts)
+
+
+@router.get("/roadmap/{passport_uuid}")
+async def upskilling_roadmap(
+    passport_uuid: str,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    3-step upskilling roadmap for a passport holder.
+
+    Each step is specific, free or near-free, time-bounded, and sourced.
+    Calibrated to the active country's resource landscape.
+    """
+    receipts = await _get_receipts(db, passport_uuid)
+
+    isco_counts: dict[str, int] = {}
+    for r in receipts:
+        if r.get("isco_code"):
+            isco_counts[r["isco_code"]] = isco_counts.get(r["isco_code"], 0) + 1
+    dominant_isco = max(isco_counts, key=isco_counts.get) if isco_counts else "7422"
+
+    calibration = get_calibration(dominant_isco)
+    calibrated_risk = calibration.get("calibrated_risk", 0.37)
+
+    return build_roadmap(
+        isco_code=dominant_isco,
+        calibrated_risk=calibrated_risk,
+        receipts=receipts,
+    )
+
+
+@router.get("/roadmap/isco/{isco_code}")
+async def upskilling_roadmap_by_isco(isco_code: str, risk: float = 0.37):
+    """3-step roadmap for any ISCO code — no passport required. Uses provided risk score."""
+    return build_roadmap(isco_code=isco_code, calibrated_risk=risk)
 
 
 @router.get("/profile/{passport_uuid}")

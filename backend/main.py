@@ -20,6 +20,7 @@ from backend.config_loader import get_config
 from backend.models.db import init_db
 from backend.api.skills import router as skills_router
 from backend.api.readiness import router as readiness_router
+from backend.api.matching import router as matching_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -90,11 +91,17 @@ from pathlib import Path
 
 app.include_router(skills_router, prefix="/skills", tags=["skills"])
 app.include_router(readiness_router, prefix="/readiness", tags=["readiness"])
+app.include_router(matching_router, prefix="/matching", tags=["matching"])
 
 # Serve the Telegram Web App files
 _WEBAPP_DIR = Path(__file__).parent.parent / "telegram_bot" / "webapp"
 if _WEBAPP_DIR.exists():
     app.mount("/webapp", StaticFiles(directory=str(_WEBAPP_DIR), html=True), name="webapp")
+
+# Serve the policymaker dashboard
+_DASHBOARD_DIR = Path(__file__).parent.parent / "policymaker_dashboard"
+if _DASHBOARD_DIR.exists():
+    app.mount("/dashboard", StaticFiles(directory=str(_DASHBOARD_DIR), html=True), name="dashboard")
 
 
 @app.get("/passport/{passport_uuid}")
