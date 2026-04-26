@@ -213,6 +213,7 @@ def main() -> None:
         states={
             SETUP: [MessageHandler(filters.TEXT & ~filters.COMMAND, setup_country)],
             INTERVIEW: [
+                CommandHandler("interview", start_interview_command),
                 MessageHandler(filters.TEXT & ~filters.COMMAND, handle_interview_message),
                 MessageHandler(filters.VOICE, handle_voice),
                 MessageHandler(filters.PHOTO, handle_photo),
@@ -221,6 +222,7 @@ def main() -> None:
         },
         fallbacks=[CommandHandler("cancel", cancel)],
         persistent=False,
+        allow_reentry=True,
     )
 
     application.add_handler(CommandHandler("start", start))
