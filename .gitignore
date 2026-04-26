@@ -1,0 +1,49 @@
+# Environment
+.env
+.env.local
+*.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+venv/
+env/
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Data cache (large files — download via scripts)
+data/frey_osborne.csv
+data/wittgenstein_2035.csv
+data/esco_skills.json
+
+# Node / React
+policymaker_dashboard/node_modules/
+policymaker_dashboard/dist/
+policymaker_dashboard/.next/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Secrets
+*.pem
+*.key

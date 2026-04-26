@@ -1,0 +1,203 @@
+##############################################################################
+# UNMAPPED — Country Configuration: Ghana
+# ISO 3166-1 alpha-3: GHA
+#
+# To activate: ACTIVE_COUNTRY=ghana
+# This file is the ONLY thing that changes between deployments.
+# Zero code changes required to support a new country.
+##############################################################################
+
+country:
+  iso_code: GHA
+  name: Ghana
+  name_local: "Ghana"
+  currency: GHS
+  currency_symbol: "₵"
+  region: sub_saharan_africa
+  context: urban_informal   # urban_informal | rural_agricultural | mixed
+
+language:
+  primary: en
+  secondary:
+    - tw   # Twi (Akan dialect, ~9M speakers)
+    - ha   # Hausa (~250K speakers in northern Ghana)
+    - ee   # Ewe (~3M speakers, Volta Region)
+  rtl: false
+  script: latin
+  ui_strings_path: locales/gh/
+  # Voice input languages (Whisper language codes)
+  voice_languages:
+    - en
+    - tw
+
+labor_market:
+  wage_source: ilostat
+  wage_endpoint: "https://www.ilo.org/sdmx/rest/data/ILO,DF_EAR_INDE_NOC_NB_A"
+  sector_classification: isic_rev4
+  informal_sector_share: 0.89          # source: Ghana Statistical Service 2022
+  informal_sector_share_source: "Ghana Statistical Service, Integrated Business Establishment Survey 2022"
+  youth_unemployment_rate: 0.147       # source: ILO ILOSTAT 2023
+  youth_unemployment_source: "ILO ILOSTAT, 2023"
+  dominant_sectors:
+    - agriculture
+    - trade_retail
+    - repair_services
+    - construction
+    - manufacturing_artisanal
+  growing_sectors:
+    - solar_energy
+    - mobile_financial_services
+    - agri_processing
+    - digital_services
+  geo_unit: district   # unit for proximity matching
+
+education_taxonomy:
+  levels:
+    - id: none
+      label: "No formal schooling"
+      years: 0
+      isced: 0
+    - id: primary
+      label: "Primary (Basic 1–6)"
+      years: 6
+      isced: 1
+    - id: jhs
+      label: "Junior High School (JHS / Basic 7–9)"
+      years: 9
+      isced: 2
+      credential: "BECE (Basic Education Certificate Examination)"
+    - id: shs
+      label: "Senior High School (SHS)"
+      years: 12
+      isced: 3
+      credential: "WASSCE (West African Senior School Certificate)"
+    - id: tvet
+      label: "TVET / Apprenticeship"
+      years: 11   # JHS + 2 years vocational
+      isced: 3
+      credential: "NABPTEX certificate"
+    - id: diploma
+      label: "HND / Diploma"
+      years: 14
+      isced: 5
+      credential: "HND (Higher National Diploma)"
+    - id: degree
+      label: "Bachelor's Degree or higher"
+      years: 16
+      isced: 6
+  credential_mapping_path: data/credential_maps/gh_credential_map.csv
+
+automation_calibration:
+  baseline: frey_osborne   # Frey & Osborne 2013/2017 — US labor market
+  # Adjustments bring the US baseline to Ghana context
+  # Each factor documented with rationale and source
+  infrastructure_adjustment: 0.70
+  infrastructure_adjustment_rationale: >
+    Ghana's ICT Development Index score (ITU 2023) indicates significantly
+    lower digital infrastructure density than the US baseline, reducing
+    the realized rate of automation adoption in the near term.
+  infrastructure_adjustment_source: "ITU ICT Development Index 2023"
+  informal_economy_adjustment: 0.60
+  informal_economy_adjustment_rationale: >
+    89% informal sector share means most tasks are executed in contexts
+    where automation investment is not economically viable for employers.
+    ILO task indices show higher routine manual / lower routine cognitive
+    task mix than OECD economies, shifting actual displacement risk.
+  informal_economy_adjustment_source: "ILO World Employment and Social Outlook 2024 + Ghana Statistical Service"
+  combined_calibration_formula: "calibrated = baseline × infrastructure_adj × informal_adj"
+  worked_example:
+    occupation: "Repair and maintenance of electronic equipment (ISCO 7422)"
+    frey_osborne_us: 0.89
+    infrastructure_adjusted: 0.623   # 0.89 × 0.70
+    fully_calibrated: 0.374          # 0.89 × 0.70 × 0.60
+    display_note: "Frey-Osborne says 89%. In Ghana, it's ~37%. Here's why."
+    # Note: a further market-access adjustment brings practical displacement
+    # lower still; 37% is a conservative (high) estimate.
+
+opportunity_types:
+  formal_employment: true
+  self_employment: true
+  gig: true
+  training_pathways: true
+  apprenticeships: true     # NVTI-registered apprenticeship system
+  cooperative: true         # community savings/cooperative economy
+
+training_providers:
+  registration_body: "National Vocational Training Institute (NVTI)"
+  certification_body: "Council for Technical and Vocational Education and Training (COTVET)"
+  major_providers:
+    - "NVTI centers (nationwide)"
+    - "TVET institutions under GES"
+    - "Youth Employment Agency (YEA) programs"
+
+peer_vouching:
+  # SMS short code for peer verification
+  sms_enabled: true
+  short_code: "UNMAPPED"     # demo: mock; production: Twilio Ghana
+  verification_message_template: >
+    Reply YES to confirm {holder_name} provided you with {service_description}.
+    Your response adds a verified receipt to their Skills Passport.
+    Powered by UNMAPPED.
+  language: en
+
+geo:
+  # Ghana has 16 regions, 261 districts
+  admin_level_1: region
+  admin_level_2: district
+  bounding_box:
+    lat_min: 4.74
+    lat_max: 11.17
+    lon_min: -3.26
+    lon_max: 1.20
+  major_urban_centers:
+    - name: Accra
+      region: Greater Accra
+      lat: 5.5560
+      lon: -0.1969
+    - name: Kumasi
+      region: Ashanti
+      lat: 6.6885
+      lon: -1.6244
+    - name: Tamale
+      region: Northern
+      lat: 9.4008
+      lon: -0.8393
+
+##############################################################################
+# DATA GAPS — disclosed in the UI, not hidden
+# These are rendered as tooltips with ⚠ icon on any figure derived from them
+##############################################################################
+data_gaps:
+  - id: step_outdated
+    severity: medium
+    affects: [education_returns, skills_demand]
+    disclosure: >
+      World Bank STEP survey data for Ghana is from 2012–2014. Skills demand
+      estimates use regional Sub-Saharan Africa proxies for 2015–2025 changes.
+    source_used: "World Bank STEP 2012–2014 (GHA) + SSA regional trend proxy"
+
+  - id: informal_wages
+    severity: medium
+    affects: [wage_floor, income_multiple]
+    disclosure: >
+      Formal wage floors from ILOSTAT. Informal sector wages estimated from
+      Ghana Living Standards Survey (GLSS-8, 2017) and adjusted by CPI.
+      Actual informal wages vary significantly by locality and season.
+    source_used: "ILOSTAT formal wages + GLSS-8 2017 informal estimate"
+
+  - id: geo_opportunity
+    severity: low
+    affects: [openings_within_30km]
+    disclosure: >
+      Opportunity counts by location are modelled from sector employment
+      density data, not live vacancy feeds. Rural figures especially uncertain.
+    source_used: "GSS Economic Census 2020 + sector employment density model"
+
+  - id: displacement_projections
+    severity: high
+    affects: [time_machine_2035, cost_of_inaction]
+    disclosure: >
+      2035 projections use Wittgenstein Centre education scenarios combined
+      with ILO Future of Work task-displacement estimates. Projection
+      uncertainty is ±40% at the district level.
+    source_used: "Wittgenstein Centre (2023 revision) + ILO WESO 2024"

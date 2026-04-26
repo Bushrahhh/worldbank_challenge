@@ -1,0 +1,56 @@
+##############################################################################
+# UNMAPPED UI Strings — Ghana / English
+#
+# Dignity test: every string must pass the Amara test.
+# Forbidden words: low-skilled, vulnerable, beneficiary, disadvantaged
+##############################################################################
+
+app:
+  name: "UNMAPPED"
+  tagline: "Know where you stand. Know what's reachable."
+
+interview:
+  greeting: >
+    Hi! I'm going to ask you a few questions about the work you do and what
+    you're good at. There are no wrong answers — just tell me about your
+    real experience. Ready?
+  voice_prompt: "Tap the mic and speak in any language. I'll understand you."
+  skill_probe: "Walk me through how you do that — step by step."
+  evidence_prompt: "Can you tell me about a time you did this for someone?"
+
+passport:
+  title: "Your Skills Passport"
+  subtitle: "A record of what you know and what you can do."
+  receipt_label: "Skill verified"
+  share_prompt: "Share your passport"
+  qr_hint: "Anyone with a phone can scan this to see your skills."
+
+readiness:
+  headline: "Your readiness snapshot"
+  automation_context: >
+    Global data says %s%% of work like yours could be automated.
+    In %s, that number is closer to %s%%. Here's why the difference matters.
+  weather_sunny: "Your skills are in high demand and growing."
+  weather_cloudy: "Some of your work faces change in the next few years."
+  weather_rainy: >
+    Parts of your current work may shift significantly by 2030.
+    Here are three things you can add to stay ahead.
+  data_gap_notice: "⚠ This estimate uses %s"
+
+matching:
+  result_header: "Opportunities that match your skills"
+  distance_label: "Getting there:"
+  training_months: "%d months of training"
+  income_multiple: "%.1f× your current income"
+  openings_nearby: "%d openings within %dkm"
+  wrong_job_label: "Not a match for you — here's why"
+  wage_floor_label: "Typical wage (ILOSTAT %d)"
+  sector_growth_label: "Sector growth (%s)"
+  source_tooltip: "Source: %s"
+
+errors:
+  no_data: "We don't have that data yet. We'll tell you what we're using instead."
+  network: "Connection issue — your work is saved. Try again when you're back online."
+  generic: "Something went wrong. Your profile is safe."
+
+data_gap_banner: "We're being honest with you: %s"

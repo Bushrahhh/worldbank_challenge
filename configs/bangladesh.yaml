@@ -1,0 +1,249 @@
+##############################################################################
+# UNMAPPED — Country Configuration: Bangladesh
+# ISO 3166-1 alpha-3: BGD
+#
+# To activate: ACTIVE_COUNTRY=bangladesh
+# This file is the ONLY thing that changes between deployments.
+# Zero code changes required to support a new country.
+##############################################################################
+
+country:
+  iso_code: BGD
+  name: Bangladesh
+  name_local: "বাংলাদেশ"
+  currency: BDT
+  currency_symbol: "৳"
+  region: south_asia
+  context: rural_agricultural   # urban_informal | rural_agricultural | mixed
+
+language:
+  primary: bn   # Bengali / Bangla — official language
+  secondary:
+    - en   # English (education, formal sector)
+  rtl: false
+  script: bengali   # ব (different script from latin — UI must handle)
+  ui_strings_path: locales/bd/
+  number_format: bn_IN   # Bengali numeral system used in some contexts
+  # Voice input languages (Whisper language codes)
+  voice_languages:
+    - bn
+    - en
+
+labor_market:
+  wage_source: ilostat
+  wage_endpoint: "https://www.ilo.org/sdmx/rest/data/ILO,DF_EAR_INDE_NOC_NB_A"
+  sector_classification: isic_rev4
+  informal_sector_share: 0.85          # source: BBS Labor Force Survey 2022
+  informal_sector_share_source: "Bangladesh Bureau of Statistics, Labor Force Survey 2022"
+  youth_unemployment_rate: 0.128       # source: ILO ILOSTAT 2023
+  youth_unemployment_source: "ILO ILOSTAT, 2023"
+  dominant_sectors:
+    - agriculture_crop          # ~40% of labor force
+    - garment_manufacturing     # RMG sector, major formal employer
+    - construction
+    - trade_retail
+    - domestic_services
+  growing_sectors:
+    - agri_tech                 # digital agriculture extension
+    - light_manufacturing       # beyond RMG
+    - rural_health_services     # community health workers
+    - solar_irrigation          # rapid rural solar adoption
+    - mobile_financial_services # bKash / Nagad ecosystem
+  geo_unit: upazila   # sub-district unit, ~500 in Bangladesh
+
+education_taxonomy:
+  levels:
+    - id: none
+      label: "No formal schooling"
+      years: 0
+      isced: 0
+    - id: primary
+      label: "Primary (Class 1–5)"
+      years: 5
+      isced: 1
+      credential: "Primary Education Completion (PEC)"
+    - id: jsc
+      label: "Junior School Certificate (Class 6–8)"
+      years: 8
+      isced: 2
+      credential: "JSC (Junior School Certificate)"
+    - id: ssc
+      label: "Secondary School Certificate (Class 9–10)"
+      years: 10
+      isced: 2
+      credential: "SSC (Secondary School Certificate)"
+    - id: hsc
+      label: "Higher Secondary Certificate (Class 11–12)"
+      years: 12
+      isced: 3
+      credential: "HSC (Higher Secondary Certificate)"
+    - id: tvet
+      label: "Technical/Vocational (SSC-level TVET)"
+      years: 10
+      isced: 3
+      credential: "SSC (Vocational) — BTEB"
+    - id: diploma
+      label: "Diploma in Engineering / Agriculture"
+      years: 14   # after SSC
+      isced: 5
+      credential: "Diploma — BTEB"
+    - id: degree
+      label: "Bachelor's Degree or higher"
+      years: 16
+      isced: 6
+  credential_mapping_path: data/credential_maps/bd_credential_map.csv
+
+automation_calibration:
+  baseline: frey_osborne   # Frey & Osborne 2013/2017 — US labor market
+  # Adjustments bring the US baseline to Bangladesh rural context
+  infrastructure_adjustment: 0.65
+  infrastructure_adjustment_rationale: >
+    Bangladesh's ICT Development Index (ITU 2023) and rural electrification
+    coverage (~90% but unreliable) indicate significantly constrained
+    automation adoption, especially outside Dhaka and Chittagong corridors.
+  infrastructure_adjustment_source: "ITU ICT Development Index 2023 + BPDB electrification data"
+  informal_economy_adjustment: 0.55
+  informal_economy_adjustment_rationale: >
+    85% informal share, predominantly in smallholder agriculture where
+    automation economics depend on land fragmentation. ILO task data shows
+    high routine manual (agricultural) but in a context where labor cost
+    relative to automation capital makes mechanization slow outside of
+    large commercial operations.
+  informal_economy_adjustment_source: "ILO World Employment and Social Outlook 2024 + BBS LFS 2022"
+  combined_calibration_formula: "calibrated = baseline × infrastructure_adj × informal_adj"
+  worked_example:
+    occupation: "Agricultural laborer / crop production (ISCO 6111)"
+    frey_osborne_us: 0.71
+    infrastructure_adjusted: 0.462   # 0.71 × 0.65
+    fully_calibrated: 0.254          # 0.71 × 0.65 × 0.55
+    display_note: "Frey-Osborne says 71%. In rural Bangladesh, it's ~25%. Here's why."
+
+opportunity_types:
+  formal_employment: true
+  self_employment: true
+  gig: false                    # gig platform penetration low in rural BGD
+  training_pathways: true
+  apprenticeships: true
+  cooperative: true             # Grameen-model cooperatives, women's groups
+
+training_providers:
+  registration_body: "Bangladesh Technical Education Board (BTEB)"
+  certification_body: "BTEB (same body)"
+  major_providers:
+    - "Technical Training Centers (TTCs) — BMET"
+    - "Youth Training Centers (YTCs)"
+    - "NGO-led training: BRAC Skills Development Programme"
+    - "Skills for Employment Investment Program (SEIP) — Finance Division"
+
+peer_vouching:
+  sms_enabled: true
+  short_code: "UNMAPPED"     # demo: mock; production: Twilio Bangladesh
+  verification_message_template: >
+    উত্তর দিন YES যদি {holder_name} আপনাকে {service_description} সেবা প্রদান করে থাকেন।
+    আপনার উত্তর তার Skills Passport-এ যুক্ত হবে। UNMAPPED দ্বারা পরিচালিত।
+  language: bn
+
+geo:
+  # Bangladesh has 8 divisions, 64 districts, ~500 upazilas
+  admin_level_1: division
+  admin_level_2: district
+  admin_level_3: upazila   # finest grain for proximity matching
+  bounding_box:
+    lat_min: 20.74
+    lat_max: 26.63
+    lon_min: 88.01
+    lon_max: 92.67
+  major_urban_centers:
+    - name: Dhaka
+      division: Dhaka
+      lat: 23.8103
+      lon: 90.4125
+    - name: Chittagong
+      division: Chittagong
+      lat: 22.3569
+      lon: 91.7832
+    - name: Sylhet
+      division: Sylhet
+      lat: 24.8949
+      lon: 91.8687
+    - name: Rajshahi
+      division: Rajshahi
+      lat: 24.3745
+      lon: 88.6042
+
+# Heritage skills specific to Bangladesh context
+# (merges with global heritage skills registry in heritage_skills.py)
+heritage_skills_local:
+  - id: hs_bd_01
+    label: "bKash / Nagad mobile money operations"
+    description: "Managing transactions, float, customer issues via mobile financial services"
+    esco_proxy: "S4.1.1"
+    employer_value: high
+  - id: hs_bd_02
+    label: "Homestead vegetable cultivation"
+    description: "Year-round homestead gardening including pest management and seasonal planning"
+    esco_proxy: "A1.1.2"
+    employer_value: medium
+  - id: hs_bd_03
+    label: "Kantha / handloom craft"
+    description: "Traditional textile skills: stitching, weaving, quality assessment"
+    esco_proxy: "C14.1"
+    employer_value: medium
+  - id: hs_bd_04
+    label: "Disaster preparedness and community response"
+    description: "Cyclone/flood response coordination, trained or experienced"
+    esco_proxy: "S8.3.1"
+    employer_value: high
+
+##############################################################################
+# DATA GAPS — disclosed in the UI, not hidden
+##############################################################################
+data_gaps:
+  - id: step_unavailable
+    severity: high
+    affects: [education_returns, skills_demand]
+    disclosure: >
+      World Bank STEP survey data is not available for Bangladesh. Skills
+      demand figures use South Asia regional aggregates (primarily India
+      and Sri Lanka data) as proxies. Rural Bangladesh labor market
+      dynamics may differ significantly.
+    source_used: "World Bank STEP South Asia regional aggregate (IND + LKA proxy)"
+
+  - id: rural_wages
+    severity: high
+    affects: [wage_floor, income_multiple]
+    disclosure: >
+      Formal minimum wage data from ILOSTAT covers RMG sector and formal
+      employment. Rural agricultural and informal wages estimated from
+      HIES 2022 (Household Income and Expenditure Survey). Seasonal
+      variation in agricultural wages not captured in annual figures.
+    source_used: "ILOSTAT + Bangladesh HIES 2022 (BBS)"
+
+  - id: upazila_opportunity
+    severity: high
+    affects: [openings_within_30km]
+    disclosure: >
+      Upazila-level opportunity counts modelled from district employment
+      density and sector distribution. No live vacancy data at sub-district
+      level. Rural figures are estimates with high uncertainty.
+    source_used: "BBS Economic Census 2013 + sector trend extrapolation"
+
+  - id: displacement_projections
+    severity: high
+    affects: [time_machine_2035, cost_of_inaction]
+    disclosure: >
+      2035 projections use Wittgenstein Centre South Asia scenarios.
+      Bangladesh climate displacement (flood, cyclone) interacts with
+      labor displacement in ways this model does not capture. Coastal
+      upazila figures especially uncertain.
+    source_used: "Wittgenstein Centre (2023 revision) + ILO WESO 2024"
+
+  - id: automation_rural
+    severity: medium
+    affects: [readiness_score, automation_risk]
+    disclosure: >
+      Automation risk calibration uses national-level factors. Rural
+      smallholder agriculture may have different (lower) near-term
+      automation risk than urban manufacturing — this model applies
+      a single national calibration factor and may overstate rural risk.
+    source_used: "ILO task indices + own calibration methodology"

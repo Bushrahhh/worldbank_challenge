@@ -1,0 +1,42 @@
+# UNMAPPED dependencies
+# Install: pip install -r requirements.txt
+
+# ── Web framework ────────────────────────────────────────────────────────────
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
+python-multipart==0.0.12
+
+# ── Config ───────────────────────────────────────────────────────────────────
+pydantic==2.9.2
+pydantic-settings==2.6.1
+pyyaml==6.0.2
+python-dotenv==1.0.1
+
+# ── LLM / AI ─────────────────────────────────────────────────────────────────
+groq==0.12.0           # Groq API — Llama 3.1 70B + Whisper
+# ollama==0.3.3        # production fallback — uncomment when needed
+
+# ── Telegram bot ─────────────────────────────────────────────────────────────
+python-telegram-bot==21.6
+
+# ── Data ─────────────────────────────────────────────────────────────────────
+httpx==0.27.2          # async HTTP for data adapters
+pandas==2.2.3          # Frey-Osborne + Wittgenstein CSV processing
+numpy==2.1.3
+
+# ── Skills Passport ──────────────────────────────────────────────────────────
+qrcode[pil]==8.0       # QR code generation for Skills Passport
+cryptography==43.0.3   # ed25519 signing for passport integrity
+
+# ── Storage ──────────────────────────────────────────────────────────────────
+sqlalchemy==2.0.36
+aiosqlite==0.20.0      # async SQLite for demo
+
+# ── SVG / visualization ──────────────────────────────────────────────────────
+svgwrite==1.4.3        # Skills Constellation Map SVG generation
+
+# ── Dev / test ───────────────────────────────────────────────────────────────
+pytest==8.3.3
+pytest-asyncio==0.24.0
+httpx==0.27.2          # also used in tests (TestClient)
+ruff==0.7.4            # linting
