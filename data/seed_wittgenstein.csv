@@ -1,0 +1,55 @@
+country_iso3,country_name,year,scenario,age_group,education_level,education_label,population_thousands,population_share,notes
+GHA,Ghana,2025,SSP2,25-64,e1,No Education,1850,0.095,WIC 2023 medium scenario
+GHA,Ghana,2025,SSP2,25-64,e2,Incomplete Primary,980,0.051,WIC 2023 medium scenario
+GHA,Ghana,2025,SSP2,25-64,e3,Primary,3420,0.176,WIC 2023 medium scenario
+GHA,Ghana,2025,SSP2,25-64,e4,Lower Secondary,5100,0.263,WIC 2023 medium scenario
+GHA,Ghana,2025,SSP2,25-64,e5,Upper Secondary,5380,0.277,WIC 2023 medium scenario
+GHA,Ghana,2025,SSP2,25-64,e6,Post-Secondary Non-Tertiary,680,0.035,WIC 2023 medium scenario
+GHA,Ghana,2025,SSP2,25-64,e7,Short-Cycle Tertiary,820,0.042,WIC 2023 medium scenario
+GHA,Ghana,2025,SSP2,25-64,e8,Bachelor or Higher,1160,0.060,WIC 2023 medium scenario
+GHA,Ghana,2030,SSP2,25-64,e1,No Education,1620,0.073,WIC 2023 projection
+GHA,Ghana,2030,SSP2,25-64,e2,Incomplete Primary,810,0.037,WIC 2023 projection
+GHA,Ghana,2030,SSP2,25-64,e3,Primary,3200,0.145,WIC 2023 projection
+GHA,Ghana,2030,SSP2,25-64,e4,Lower Secondary,5600,0.254,WIC 2023 projection
+GHA,Ghana,2030,SSP2,25-64,e5,Upper Secondary,6800,0.308,WIC 2023 projection
+GHA,Ghana,2030,SSP2,25-64,e6,Post-Secondary Non-Tertiary,980,0.044,WIC 2023 projection
+GHA,Ghana,2030,SSP2,25-64,e7,Short-Cycle Tertiary,1240,0.056,WIC 2023 projection
+GHA,Ghana,2030,SSP2,25-64,e8,Bachelor or Higher,1790,0.081,WIC 2023 projection
+GHA,Ghana,2035,SSP2,25-64,e1,No Education,1340,0.053,WIC 2023 projection
+GHA,Ghana,2035,SSP2,25-64,e2,Incomplete Primary,650,0.026,WIC 2023 projection
+GHA,Ghana,2035,SSP2,25-64,e3,Primary,2900,0.115,WIC 2023 projection
+GHA,Ghana,2035,SSP2,25-64,e4,Lower Secondary,6100,0.242,WIC 2023 projection
+GHA,Ghana,2035,SSP2,25-64,e5,Upper Secondary,8200,0.325,WIC 2023 projection
+GHA,Ghana,2035,SSP2,25-64,e6,Post-Secondary Non-Tertiary,1400,0.056,WIC 2023 projection
+GHA,Ghana,2035,SSP2,25-64,e7,Short-Cycle Tertiary,1900,0.075,WIC 2023 projection
+GHA,Ghana,2035,SSP2,25-64,e8,Bachelor or Higher,2700,0.107,WIC 2023 projection
+GHA,Ghana,2035,SSP1,25-64,e5,Upper Secondary,8900,0.343,WIC 2023 fast scenario
+GHA,Ghana,2035,SSP1,25-64,e7,Short-Cycle Tertiary,2400,0.092,WIC 2023 fast scenario
+GHA,Ghana,2035,SSP1,25-64,e8,Bachelor or Higher,3400,0.131,WIC 2023 fast scenario
+GHA,Ghana,2035,SSP3,25-64,e1,No Education,1800,0.068,WIC 2023 slow scenario
+GHA,Ghana,2035,SSP3,25-64,e5,Upper Secondary,7100,0.270,WIC 2023 slow scenario
+GHA,Ghana,2035,SSP3,25-64,e8,Bachelor or Higher,1900,0.072,WIC 2023 slow scenario
+BGD,Bangladesh,2025,SSP2,25-64,e1,No Education,3200,0.050,WIC 2023 medium scenario
+BGD,Bangladesh,2025,SSP2,25-64,e2,Incomplete Primary,5100,0.079,WIC 2023 medium scenario
+BGD,Bangladesh,2025,SSP2,25-64,e3,Primary,8400,0.130,WIC 2023 medium scenario
+BGD,Bangladesh,2025,SSP2,25-64,e4,Lower Secondary,18500,0.286,WIC 2023 medium scenario
+BGD,Bangladesh,2025,SSP2,25-64,e5,Upper Secondary,17200,0.266,WIC 2023 medium scenario
+BGD,Bangladesh,2025,SSP2,25-64,e6,Post-Secondary Non-Tertiary,3400,0.053,WIC 2023 medium scenario
+BGD,Bangladesh,2025,SSP2,25-64,e7,Short-Cycle Tertiary,4100,0.063,WIC 2023 medium scenario
+BGD,Bangladesh,2025,SSP2,25-64,e8,Bachelor or Higher,4800,0.074,WIC 2023 medium scenario
+BGD,Bangladesh,2030,SSP2,25-64,e1,No Education,2800,0.039,WIC 2023 projection
+BGD,Bangladesh,2030,SSP2,25-64,e5,Upper Secondary,19800,0.276,WIC 2023 projection
+BGD,Bangladesh,2030,SSP2,25-64,e8,Bachelor or Higher,6500,0.091,WIC 2023 projection
+BGD,Bangladesh,2035,SSP2,25-64,e1,No Education,2200,0.028,WIC 2023 projection
+BGD,Bangladesh,2035,SSP2,25-64,e2,Incomplete Primary,3800,0.048,WIC 2023 projection
+BGD,Bangladesh,2035,SSP2,25-64,e3,Primary,7100,0.090,WIC 2023 projection
+BGD,Bangladesh,2035,SSP2,25-64,e4,Lower Secondary,19000,0.241,WIC 2023 projection
+BGD,Bangladesh,2035,SSP2,25-64,e5,Upper Secondary,24000,0.304,WIC 2023 projection
+BGD,Bangladesh,2035,SSP2,25-64,e6,Post-Secondary Non-Tertiary,5500,0.070,WIC 2023 projection
+BGD,Bangladesh,2035,SSP2,25-64,e7,Short-Cycle Tertiary,8100,0.103,WIC 2023 projection
+BGD,Bangladesh,2035,SSP2,25-64,e8,Bachelor or Higher,9100,0.115,WIC 2023 projection
+BGD,Bangladesh,2035,SSP1,25-64,e5,Upper Secondary,26000,0.325,WIC 2023 fast scenario
+BGD,Bangladesh,2035,SSP1,25-64,e8,Bachelor or Higher,12000,0.150,WIC 2023 fast scenario
+BGD,Bangladesh,2035,SSP3,25-64,e1,No Education,3100,0.038,WIC 2023 slow scenario
+BGD,Bangladesh,2035,SSP3,25-64,e5,Upper Secondary,21000,0.257,WIC 2023 slow scenario
+BGD,Bangladesh,2035,SSP3,25-64,e8,Bachelor or Higher,6200,0.076,WIC 2023 slow scenario

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>UNMAPPED Readiness Lens</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e8eaed;
+      min-height: 100vh;
+      padding: 0;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+      border-bottom: 1px solid #2a2d36;
+      padding: 20px 16px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #8b949e;
+    }
+    .header .subtitle {
+      font-size: 11px;
+      color: #4a5568;
+      margin-top: 2px;
+    }
+    .back-btn {
+      background: none;
+      border: 1px solid #2a2d36;
+      color: #8b949e;
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: auto;
+    }
+
+    /* ── Tab bar ── */
+    .tabs {
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex-shrink: 0;
+      padding: 10px 16px;
+      font-size: 12px;
+      font-weight: 500;
+      color: #8b949e;
+      border-bottom: 2px solid transparent;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .tab.active {
+      color: #58a6ff;
+      border-bottom-color: #58a6ff;
+    }
+
+    /* ── Panels ── */
+    .panel { display: none; padding: 16px; }
+    .panel.active { display: block; }
+
+    /* ── Calibration Panel ── */
+    .calibration-hero {
+      background: linear-gradient(135deg, #1a1d27, #0f1117);
+      border: 1px solid #2a2d36;
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .calibration-hero .occupation {
+      font-size: 12px;
+      color: #8b949e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 20px;
+    }
+    .score-flip {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .score-box {
+      text-align: center;
+    }
+    .score-box .number {
+      font-size: 52px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .score-box .number.danger { color: #f85149; }
+    .score-box .number.safe   { color: #3fb950; }
+    .score-box .number.warn   { color: #f0b429; }
+    .score-box .label {
+      font-size: 10px;
+      color: #8b949e;
+      margin-top: 4px;
+      letter-spacing: 0.5px;
+    }
+    .score-arrow {
+      font-size: 24px;
+      color: #58a6ff;
+    }
+
+    .step-chain {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .step-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1a1d27;
+      border: 1px solid #2a2d36;
+      border-radius: 8px;
+      padding: 10px 14px;
+    }
+    .step-row .step-num {
+      font-size: 10px;
+      font-weight: 700;
+      color: #8b949e;
+      width: 18px;
+      flex-shrink: 0;
+    }
+    .step-row .step-pct {
+      font-size: 20px;
+      font-weight: 700;
+      min-width: 52px;
+    }
+    .step-row .step-text {
+      font-size: 12px;
+      color: #8b949e;
+      line-height: 1.4;
+    }
+    .step-row .step-text strong { color: #e8eaed; }
+
+    .narrative-card {
+      background: #1a1d27;
+      border: 1px solid #2a2d36;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      color: #8b949e;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+
+    .protective-list {
+      margin-bottom: 16px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #8b949e;
+      margin-bottom: 10px;
+    }
+    .protective-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      border-bottom: 1px solid #1a1d27;
+      font-size: 13px;
+      color: #e8eaed;
+    }
+    .protective-item:last-child { border-bottom: none; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: #3fb950; flex-shrink: 0; }
+
+    /* ── Weather Panel ── */
+    .weather-hero {
+      border-radius: 14px;
+      padding: 28px 20px;
+      text-align: center;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .weather-icon { font-size: 64px; margin-bottom: 12px; line-height: 1; }
+    .weather-headline {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .weather-horizon {
+      font-size: 12px;
+      opacity: 0.7;
+    }
+    .weather-desc {
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.6;
+      margin-top: 16px;
+      text-align: left;
+      color: #e8eaed;
+    }
+    .action-card {
+      background: #1a1d27;
+      border-left: 3px solid #58a6ff;
+      border-radius: 0 8px 8px 0;
+      padding: 12px 14px;
+      font-size: 13px;
+      color: #e8eaed;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .umbrella-skill {
+      background: #1a1d27;
+      border: 1px solid #2a2d36;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+    }
+    .umbrella-label { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+    .umbrella-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 11px;
+      color: #8b949e;
+    }
+    .tag {
+      background: #1e2a3a;
+      color: #58a6ff;
+      border: 1px solid #2a4a6a;
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 10px;
+    }
+    .tag.green { background: #1e3a1e; color: #3fb950; border-color: #2a5a2a; }
+
+    /* ── Time Machine Panel ── */
+    .tm-intro {
+      background: #1a1d27;
+      border: 1px solid #2a2d36;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      color: #8b949e;
+      line-height: 1.5;
+      margin-bottom: 16px;
+    }
+    .tm-panels-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .tm-panel-card {
+      background: #1a1d27;
+      border: 1px solid #2a2d36;
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .tm-panel-card.path-b {
+      border-color: #3fb950;
+      grid-column: 1 / -1;
+    }
+    .tm-panel-title {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #8b949e;
+      margin-bottom: 8px;
+    }
+    .tm-risk-number {
+      font-size: 32px;
+      font-weight: 800;
+      color: #f85149;
+      line-height: 1;
+    }
+    .tm-risk-number.good { color: #3fb950; }
+    .tm-risk-number.ok   { color: #f0b429; }
+    .tm-year { font-size: 11px; color: #8b949e; }
+    .tm-narrative {
+      font-size: 12px;
+      color: #8b949e;
+      line-height: 1.5;
+      margin-top: 8px;
+    }
+    .education-bar-list { margin-top: 10px; }
+    .edu-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 5px;
+    }
+    .edu-label { font-size: 10px; color: #8b949e; width: 80px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .edu-bar-bg { flex: 1; height: 6px; background: #2a2d36; border-radius: 3px; overflow: hidden; }
+    .edu-bar-fill { height: 100%; border-radius: 3px; background: #58a6ff; transition: width 0.6s ease; }
+    .edu-pct { font-size: 10px; color: #8b949e; width: 32px; text-align: right; flex-shrink: 0; }
+    .regret-card {
+      background: #2a1e10;
+      border: 1px solid #5a3a10;
+      border-radius: 10px;
+      padding: 14px;
+      font-size: 13px;
+      color: #f0b429;
+      line-height: 1.6;
+      margin-bottom: 16px;
+    }
+    .regret-card .regret-title {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .pressure-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid #1a1d27;
+      font-size: 12px;
+    }
+    .pressure-row:last-child { border-bottom: none; }
+    .pressure-label { color: #8b949e; }
+    .pressure-value { font-weight: 700; }
+
+    /* ── Constellation Panel ── */
+    .constellation-container {
+      position: relative;
+      background: #080c14;
+      border: 1px solid #1a2a3a;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+    #constellation-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+    .constellation-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      color: #8b949e;
+    }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .constellation-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .stat-card {
+      background: #1a1d27;
+      border: 1px solid #2a2d36;
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+    }
+    .stat-number { font-size: 24px; font-weight: 700; color: #58a6ff; }
+    .stat-label { font-size: 10px; color: #8b949e; margin-top: 2px; }
+
+    /* ── Source disclosure ── */
+    .source-note {
+      font-size: 11px;
+      color: #4a5568;
+      line-height: 1.5;
+      padding: 12px;
+      border-top: 1px solid #2a2d36;
+      margin-top: 8px;
+    }
+    .loading { text-align: center; padding: 60px 20px; color: #8b949e; }
+    .error   { text-align: center; padding: 40px 20px; color: #f85149; }
+  </style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div>
+      <div class="header h1" style="font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#8b949e;">Readiness Lens</div>
+      <div class="subtitle">What automation means for your skills</div>
+    </div>
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
+  </div>
+  <div class="tabs">
+    <div class="tab active" data-panel="calibration">Calibration</div>
+    <div class="tab" data-panel="weather">Weather</div>
+    <div class="tab" data-panel="timemachine">Time Machine</div>
+    <div class="tab" data-panel="constellation">Constellation</div>
+  </div>
+</div>
+
+<div id="app">
+  <div class="loading">Loading Readiness Lens...</div>
+</div>
+
+<script>
+  const tg = window.Telegram?.WebApp;
+  if (tg) { tg.ready(); tg.expand(); }
+
+  const params = new URLSearchParams(window.location.search);
+  const passportId = params.get('id');
+  const iscoParam  = params.get('isco') || '7422';
+  const API_BASE   = window.location.origin;
+
+  let DATA = {};
+
+  // ── Tab logic ──────────────────────────────────────────────────────────────
+  document.addEventListener('click', e => {
+    const tab = e.target.closest('.tab');
+    if (!tab) return;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    const panelId = tab.dataset.panel;
+    const panel = document.getElementById(`panel-${panelId}`);
+    if (panel) panel.classList.add('active');
+  });
+
+  // ── Data loading ───────────────────────────────────────────────────────────
+  async function loadAll() {
+    try {
+      const [profileRes, tmRes] = await Promise.all([
+        passportId
+          ? fetch(`${API_BASE}/readiness/profile/${passportId}`)
+          : fetch(`${API_BASE}/readiness/calibration/${iscoParam}`),
+        fetch(`${API_BASE}/readiness/time_machine`),
+      ]);
+
+      if (passportId) {
+        DATA.profile = await profileRes.json();
+        DATA.cal = DATA.profile.headline_calibration;
+        DATA.weather = DATA.profile.weather;
+        DATA.constellation = DATA.profile.constellation;
+      } else {
+        DATA.cal = await profileRes.json();
+        DATA.weather = await (await fetch(`${API_BASE}/readiness/weather/${iscoParam}`)).json();
+        DATA.constellation = { nodes: [], edges: [], summary: {} };
+      }
+      DATA.timeMachine = await tmRes.json();
+
+      renderAll();
+    } catch (e) {
+      document.getElementById('app').innerHTML =
+        `<div class="error">Failed to load Readiness data.<br>${e.message}</div>`;
+    }
+  }
+
+  // ── Render all panels ──────────────────────────────────────────────────────
+  function renderAll() {
+    document.getElementById('app').innerHTML = `
+      <div id="panel-calibration" class="panel active">${renderCalibration()}</div>
+      <div id="panel-weather"     class="panel">${renderWeather()}</div>
+      <div id="panel-timemachine" class="panel">${renderTimeMachine()}</div>
+      <div id="panel-constellation" class="panel">${renderConstellation()}</div>
+    `;
+    drawConstellationSVG();
+    animateBars();
+  }
+
+  // ── Calibration Panel ──────────────────────────────────────────────────────
+  function renderCalibration() {
+    const c = DATA.cal;
+    const baseClass  = c.baseline_pct >= 70 ? 'danger' : c.baseline_pct >= 50 ? 'warn' : 'safe';
+    const calClass   = c.calibrated_pct >= 50 ? 'warn' : c.calibrated_pct >= 30 ? 'warn' : 'safe';
+    const tierColors = { low:'#3fb950', medium:'#f0b429', high:'#d97706', critical:'#f85149' };
+    const tierColor  = tierColors[c.risk_tier] || '#58a6ff';
+
+    let stepsHtml = `
+      <div class="step-row">
+        <span class="step-num">1</span>
+        <span class="step-pct" style="color:#f85149">${c.baseline_pct}%</span>
+        <span class="step-text"><strong>US baseline</strong> — Frey &amp; Osborne (2013). Modelled the American workforce.</span>
+      </div>
+      <div class="step-row">
+        <span class="step-num">2</span>
+        <span class="step-pct" style="color:#f0b429">${c.infrastructure_adjusted_pct}%</span>
+        <span class="step-text"><strong>Infrastructure adjustment</strong> — Digital deployment is uneven here.
+        Factor: ×${c.calibration_factors.infrastructure.toFixed(2)}</span>
+      </div>
+      <div class="step-row">
+        <span class="step-num">3</span>
+        <span class="step-pct" style="color:${tierColor}">${c.calibrated_pct}%</span>
+        <span class="step-text"><strong>Informal economy factor</strong> — Relationships, trust, local knowledge.
+        Factor: ×${c.calibration_factors.informal_economy.toFixed(2)}</span>
+      </div>
+    `;
+
+    let protectiveHtml = (c.protective_skills || []).map(s =>
+      `<div class="protective-item"><div class="dot"></div>${s}</div>`
+    ).join('');
+
+    return `
+      <div class="calibration-hero">
+        <div class="occupation">${c.occupation_label || 'Your occupation'}</div>
+        <div class="score-flip">
+          <div class="score-box">
+            <div class="number danger">${c.baseline_pct}%</div>
+            <div class="label">US Baseline</div>
+          </div>
+          <div class="score-arrow">→</div>
+          <div class="score-box">
+            <div class="number ${calClass}">${c.calibrated_pct}%</div>
+            <div class="label">${c.country_name || 'Local'} Reality</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:${tierColor};font-weight:600;">${c.risk_tier_label} — ${c.risk_tier_note || ''}</div>
+      </div>
+
+      <div class="section-title">How we got there</div>
+      <div class="step-chain">${stepsHtml}</div>
+
+      <div class="section-title">What protects you</div>
+      <div class="protective-list">${protectiveHtml}</div>
+
+      <div class="source-note">
+        Source: Frey &amp; Osborne (2013) "The Future of Employment" ·
+        Calibration: UNMAPPED v1 using ${c.country_name || ''} infrastructure and informal economy factors.
+        ${c.data_gap_warning ? '⚠ Occupation not in F&O dataset — LMIC median used.' : ''}
+      </div>
+    `;
+  }
+
+  // ── Weather Panel ──────────────────────────────────────────────────────────
+  function renderWeather() {
+    const w = DATA.weather || {};
+    const icon    = w.overall_emoji  || w.weather_emoji  || '⛅';
+    const headline= w.overall_headline || w.weather_headline || 'Partly cloudy';
+    const color   = w.overall_color  || w.weather_color  || '#58a6ff';
+    const action  = w.overall_action || w.action         || '';
+    const desc    = w.description    || '';
+    const horizon = w.horizon        || '';
+    const skills  = w.umbrella_skills || [];
+    const protective = DATA.cal?.protective_skills || [];
+    const source  = w.source_note    || DATA.cal?.sources?.[0]?.name || '';
+
+    let umbrellaHtml = '';
+    if (skills.length > 0) {
+      umbrellaHtml = `<div class="section-title">Your umbrella skills — low automation risk</div>` +
+        skills.map(s => `
+          <div class="umbrella-skill">
+            <div class="umbrella-label">${s.label}</div>
+            <div class="umbrella-meta">
+              <span class="tag">${s.learning_time}</span>
+              <span class="tag green">${Math.round(s.calibrated_risk * 100)}% risk</span>
+              <span style="font-size:11px;color:#8b949e;">${s.why || ''}</span>
+            </div>
+          </div>`).join('');
+    }
+
+    // For passport weather: list each skill's weather
+    let skillList = '';
+    const swList = w.skill_weather || [];
+    if (swList.length > 0) {
+      skillList = `<div class="section-title">Per-skill forecast</div>` +
+        swList.slice(0, 8).map(s => `
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #1a1d27;font-size:13px;">
+            <span>${s.weather_emoji}</span>
+            <span style="flex:1;color:#e8eaed;">${s.skill_label}${s.is_heritage ? ' ★' : ''}</span>
+            <span style="color:#8b949e;font-size:11px;">${s.calibrated_risk_pct}%</span>
+          </div>`).join('');
+    }
+
+    return `
+      <div class="weather-hero" style="background:linear-gradient(135deg,${color}22,#0f1117);">
+        <div class="weather-icon">${icon}</div>
+        <div class="weather-headline">${headline}</div>
+        <div class="weather-horizon">${horizon}</div>
+        ${desc ? `<div class="weather-desc">${desc}</div>` : ''}
+      </div>
+
+      ${action ? `<div class="section-title">Your move</div><div class="action-card">${action}</div>` : ''}
+
+      ${umbrellaHtml}
+      ${skillList}
+
+      <div class="source-note">${source}</div>
+    `;
+  }
+
+  // ── Time Machine Panel ─────────────────────────────────────────────────────
+  function renderTimeMachine() {
+    const tm = DATA.timeMachine;
+    if (!tm) return '<div class="error">Time Machine data unavailable.</div>';
+
+    const { panels, regret_note, automation_pressure: ap } = tm;
+    if (!panels) return '<div class="error">Panel data missing.</div>';
+
+    function panelCard(p, title, cssClass = '') {
+      if (!p || p.unavailable) return `
+        <div class="tm-panel-card ${cssClass}">
+          <div class="tm-panel-title">${title}</div>
+          <div style="color:#8b949e;font-size:12px;">Data unavailable</div>
+        </div>`;
+      const riskColor = p.avg_automation_risk_pct > 55 ? '' : p.avg_automation_risk_pct > 40 ? 'ok' : 'good';
+      const barsHtml = (p.education_bars || []).slice(0, 5).map(b => `
+        <div class="edu-row">
+          <span class="edu-label">${b.label}</span>
+          <div class="edu-bar-bg"><div class="edu-bar-fill" data-pct="${b.share_pct}" style="width:0%"></div></div>
+          <span class="edu-pct">${b.share_pct}%</span>
+        </div>`).join('');
+      return `
+        <div class="tm-panel-card ${cssClass}">
+          <div class="tm-panel-title">${title}</div>
+          <div class="tm-year">${p.year}</div>
+          <div class="tm-risk-number ${riskColor}">${p.avg_automation_risk_pct}%</div>
+          <div style="font-size:10px;color:#8b949e;margin-bottom:8px;">avg automation risk</div>
+          <div class="education-bar-list">${barsHtml}</div>
+          <div class="tm-narrative">${p.narrative}</div>
+        </div>`;
+    }
+
+    const pressureHtml = ap ? `
+      <div class="section-title">Automation pressure across scenarios</div>
+      <div style="background:#1a1d27;border:1px solid #2a2d36;border-radius:10px;padding:14px;margin-bottom:16px;">
+        <div class="pressure-row"><span class="pressure-label">Today</span><span class="pressure-value" style="color:#f0b429">${ap.today_pct}%</span></div>
+        <div class="pressure-row"><span class="pressure-label">Do Nothing 2035</span><span class="pressure-value" style="color:#f85149">${ap.do_nothing_pct}%</span></div>
+        <div class="pressure-row"><span class="pressure-label">Path A 2035</span><span class="pressure-value" style="color:#f0b429">${ap.path_a_pct}%</span></div>
+        <div class="pressure-row"><span class="pressure-label">Path B 2035</span><span class="pressure-value" style="color:#3fb950">${ap.path_b_pct}%</span></div>
+        <div class="pressure-row"><span class="pressure-label">Intervention gain</span><span class="pressure-value" style="color:#58a6ff">−${ap.intervention_gain_pct}pp</span></div>
+      </div>` : '';
+
+    return `
+      <div class="tm-intro">
+        Wittgenstein Centre (2023) education projections for ${tm.country_name}.
+        Each panel shows the working-age population's education distribution and resulting
+        automation exposure, under three scenarios.
+      </div>
+
+      <div class="section-title">Four panels — 2025 → 2035</div>
+      <div class="tm-panels-grid">
+        ${panelCard(panels.today,      '📍 Today')}
+        ${panelCard(panels.do_nothing, '😶 Do Nothing (SSP3)')}
+        ${panelCard(panels.path_a,     '📈 Path A (SSP2)')}
+        ${panelCard(panels.path_b,     '🚀 Path B (SSP1)', 'path-b')}
+      </div>
+
+      <div class="regret-card">
+        <div class="regret-title">The cost of the missing years</div>
+        ${regret_note}
+      </div>
+
+      ${pressureHtml}
+
+      <div class="source-note">
+        Source: Wittgenstein Centre for Demography and Global Human Capital (WIC 2023 revision).
+        SSP scenarios: SSP1 = fast progress, SSP2 = medium, SSP3 = slow.
+        Projection uncertainty ±40% at district level. Climate and conflict not modelled.
+      </div>
+    `;
+  }
+
+  // ── Constellation Panel ────────────────────────────────────────────────────
+  function renderConstellation() {
+    const c = DATA.constellation;
+    const summary = c?.summary || {};
+
+    return `
+      <div style="margin-bottom:12px;font-size:13px;color:#8b949e;line-height:1.5;">
+        Your skills as a star map. Gold = Heritage. Dim red = high automation risk.
+        Outer ring = reachable in 3–9 months.
+      </div>
+
+      <div class="constellation-stats">
+        <div class="stat-card">
+          <div class="stat-number">${summary.total_skills || 0}</div>
+          <div class="stat-label">Your Skills</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#f0b429">${summary.heritage_count || 0}</div>
+          <div class="stat-label">Heritage</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" style="color:#3fb950">${summary.durable_count || 0}</div>
+          <div class="stat-label">Durable</div>
+        </div>
+      </div>
+
+      <div class="constellation-container">
+        <svg id="constellation-svg" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <radialGradient id="bg-grad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" style="stop-color:#0d1a2a;stop-opacity:1" />
+              <stop offset="100%" style="stop-color:#080c14;stop-opacity:1" />
+            </radialGradient>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+          <rect width="600" height="600" fill="url(#bg-grad)"/>
+          <!-- static star field -->
+          <g id="starfield" opacity="0.4"></g>
+          <g id="edges"></g>
+          <g id="nodes"></g>
+          <g id="labels"></g>
+        </svg>
+      </div>
+
+      <div class="section-title">Legend</div>
+      <div class="constellation-legend">
+        <div class="legend-item"><div class="legend-dot" style="background:#f0b429"></div> Heritage Skill</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#58a6ff"></div> Technical Skill</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#3fb950"></div> Social/Community</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#bc8cff"></div> Digital Skill</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#f85149"></div> High Risk</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2a3f5a"></div> Reachable</div>
+      </div>
+
+      <div class="source-note">
+        Node size = evidence quality (employer-verified > peer-vouched > self-reported).
+        Position is deterministic — same passport always produces the same map.
+        Adjacent skills shown are reachable with 3–9 months of targeted learning.
+        Risk calibrated: Frey &amp; Osborne (2013) + local factors.
+      </div>
+    `;
+  }
+
+  // ── SVG Constellation Drawing ─────────────────────────────────────────────
+  function drawConstellationSVG() {
+    const svg = document.getElementById('constellation-svg');
+    if (!svg) return;
+
+    const c = DATA.constellation;
+    if (!c || !c.nodes || c.nodes.length === 0) {
+      // Draw a placeholder if no passport
+      const g = document.getElementById('nodes');
+      g.innerHTML = `<text x="300" y="300" text-anchor="middle" fill="#4a5568" font-size="14">
+        No passport loaded — open from the Telegram bot</text>`;
+      return;
+    }
+
+    // Draw static star field
+    const sf = document.getElementById('starfield');
+    let stars = '';
+    for (let i = 0; i < 80; i++) {
+      const hx = parseInt(Math.abs(Math.sin(i * 127.3)) * 600);
+      const hy = parseInt(Math.abs(Math.cos(i * 93.7)) * 600);
+      const hr = (i % 3 === 0) ? 0.8 : 0.4;
+      stars += `<circle cx="${hx}" cy="${hy}" r="${hr}" fill="white" opacity="${0.2 + (i % 5) * 0.08}"/>`;
+    }
+    sf.innerHTML = stars;
+
+    // Draw edges
+    const edgesG = document.getElementById('edges');
+    const nodeMap = {};
+    c.nodes.forEach(n => { nodeMap[n.id] = n; });
+    edgesG.innerHTML = c.edges.map(e => {
+      const from = nodeMap[e.from];
+      const to   = nodeMap[e.to];
+      if (!from || !to) return '';
+      const dash = e.dashed ? 'stroke-dasharray="4,4"' : '';
+      return `<line x1="${from.x}" y1="${from.y}" x2="${to.x}" y2="${to.y}"
+               stroke="${e.color}" stroke-width="1" opacity="${e.opacity}" ${dash}/>`;
+    }).join('');
+
+    // Draw nodes
+    const nodesG  = document.getElementById('nodes');
+    const labelsG = document.getElementById('labels');
+    let nodesSvg = '', labelsSvg = '';
+
+    c.nodes.forEach(n => {
+      const filterAttr = n.glow ? 'filter="url(#glow)"' : '';
+      if (n.type === 'current') {
+        // Glow ring for heritage skills
+        if (n.glow) {
+          nodesSvg += `<circle cx="${n.x}" cy="${n.y}" r="${n.r + 6}" fill="none"
+                        stroke="${n.color}" stroke-width="1.5" opacity="0.35" ${filterAttr}/>`;
+        }
+        nodesSvg += `<circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="${n.color}"
+                      opacity="${n.opacity}" ${filterAttr}/>`;
+        // Label for core skills (truncated)
+        const shortLabel = n.label.length > 18 ? n.label.slice(0, 16) + '…' : n.label;
+        const labelY = n.y + n.r + 12;
+        labelsSvg += `<text x="${n.x}" y="${labelY}" text-anchor="middle"
+                       fill="#8b949e" font-size="9" opacity="0.85">${shortLabel}</text>`;
+      } else {
+        // Adjacent skills: hollow circles
+        nodesSvg += `<circle cx="${n.x}" cy="${n.y}" r="${n.r}" fill="none"
+                      stroke="${n.color}" stroke-width="1.5" opacity="${n.opacity}"/>`;
+        const shortLabel = n.label.length > 16 ? n.label.slice(0, 14) + '…' : n.label;
+        labelsSvg += `<text x="${n.x}" y="${n.y + n.r + 10}" text-anchor="middle"
+                       fill="#4a5568" font-size="8" opacity="0.7">${shortLabel}</text>`;
+      }
+    });
+
+    // Center crosshair
+    nodesSvg += `<circle cx="300" cy="300" r="2" fill="#8b949e" opacity="0.4"/>`;
+
+    nodesG.innerHTML  = nodesSvg;
+    labelsG.innerHTML = labelsSvg;
+  }
+
+  // ── Animate education bars ─────────────────────────────────────────────────
+  function animateBars() {
+    document.querySelectorAll('.edu-bar-fill').forEach(el => {
+      const pct = el.dataset.pct;
+      setTimeout(() => { el.style.width = pct + '%'; }, 100);
+    });
+  }
+
+  // ── Init ───────────────────────────────────────────────────────────────────
+  loadAll();
+</script>
+</body>
+</html>

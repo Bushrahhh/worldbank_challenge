@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>UNMAPPED Skills Passport</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #0f1117;
+      color: #e8eaed;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .header {
+      text-align: center;
+      padding: 24px 0 16px;
+      border-bottom: 1px solid #2a2d36;
+      margin-bottom: 20px;
+    }
+    .header h1 {
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #8b949e;
+      margin-bottom: 8px;
+    }
+    .passport-id {
+      font-size: 11px;
+      color: #4a5568;
+      font-family: monospace;
+    }
+    .summary-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .summary-card {
+      flex: 1;
+      background: #1a1d27;
+      border: 1px solid #2a2d36;
+      border-radius: 10px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .summary-card .number {
+      font-size: 28px;
+      font-weight: 700;
+      color: #58a6ff;
+      line-height: 1;
+    }
+    .summary-card .label {
+      font-size: 11px;
+      color: #8b949e;
+      margin-top: 4px;
+    }
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #8b949e;
+      margin-bottom: 12px;
+    }
+    .skill-card {
+      background: #1a1d27;
+      border: 1px solid #2a2d36;
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 10px;
+      position: relative;
+    }
+    .skill-card.heritage {
+      border-color: #f0b429;
+    }
+    .skill-label {
+      font-size: 15px;
+      font-weight: 500;
+      color: #e8eaed;
+      margin-bottom: 6px;
+    }
+    .skill-meta {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      font-size: 10px;
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-weight: 500;
+      letter-spacing: 0.3px;
+    }
+    .badge-self { background: #1e2a3a; color: #58a6ff; border: 1px solid #2a4a6a; }
+    .badge-peer { background: #1e3a1e; color: #3fb950; border: 1px solid #2a5a2a; }
+    .badge-employer { background: #3a2a1e; color: #f0b429; border: 1px solid #5a4a2a; }
+    .badge-heritage { background: #2a2010; color: #f0b429; border: 1px solid #5a4a10; }
+    .badge-isco { background: #1e1e2a; color: #8b949e; border: 1px solid #2a2a4a; }
+    .confidence-bar {
+      height: 3px;
+      background: #2a2d36;
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .confidence-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #238636, #3fb950);
+      border-radius: 2px;
+    }
+    .data-gap-banner {
+      background: #2a1e10;
+      border: 1px solid #5a3a10;
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+      font-size: 12px;
+      color: #f0b429;
+    }
+    .share-section {
+      margin-top: 24px;
+      text-align: center;
+    }
+    .share-btn {
+      background: #1a6ed8;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      padding: 14px 32px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .share-btn:active { background: #1558b0; }
+    .signed-indicator {
+      font-size: 11px;
+      color: #3fb950;
+      margin-top: 8px;
+    }
+    .loading { text-align: center; padding: 60px 20px; color: #8b949e; }
+    .error { text-align: center; padding: 40px 20px; color: #f85149; }
+    .country-tag {
+      font-size: 11px;
+      color: #8b949e;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="loading">Loading your Skills Passport...</div>
+  </div>
+
+  <script>
+    const tg = window.Telegram?.WebApp;
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const passportId = params.get('id');
+    const API_BASE = window.location.origin;
+
+    const EVIDENCE_LABELS = {
+      self_report: 'Self-reported',
+      peer_vouched: 'Peer-verified',
+      employer_verified: 'Employer-verified',
+      assessed: 'Assessed',
+    };
+
+    const EVIDENCE_BADGE_CLASS = {
+      self_report: 'badge-self',
+      peer_vouched: 'badge-peer',
+      employer_verified: 'badge-employer',
+      assessed: 'badge-employer',
+    };
+
+    async function loadPassport() {
+      if (!passportId) {
+        document.getElementById('app').innerHTML =
+          '<div class="error">No passport ID provided.<br>Open from the Telegram bot.</div>';
+        return;
+      }
+
+      try {
+        const resp = await fetch(`${API_BASE}/skills/passport/${passportId}`);
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const passport = await resp.json();
+        renderPassport(passport);
+      } catch (e) {
+        document.getElementById('app').innerHTML =
+          `<div class="error">Could not load passport.<br>${e.message}</div>`;
+      }
+    }
+
+    function renderPassport(passport) {
+      const skills = passport.skills || [];
+      const heritage = skills.filter(s => s.is_heritage_skill);
+      const peerVerified = skills.filter(s => s.evidence_type === 'peer_vouched');
+      const issued = (passport.issued_at || '').slice(0, 10);
+      const shortId = (passport.passport_id || '').slice(0, 12) + '...';
+
+      let html = `
+        <div class="header">
+          <h1>Skills Passport</h1>
+          <div class="passport-id">${shortId}</div>
+        </div>
+        <div class="country-tag">
+          ${passport.country_iso} · Issued ${issued}
+        </div>
+        <div class="summary-row">
+          <div class="summary-card">
+            <div class="number">${skills.length}</div>
+            <div class="label">Skills</div>
+          </div>
+          <div class="summary-card">
+            <div class="number">${heritage.length}</div>
+            <div class="label">Heritage</div>
+          </div>
+          <div class="summary-card">
+            <div class="number">${peerVerified.length}</div>
+            <div class="label">Verified</div>
+          </div>
+        </div>`;
+
+      if (heritage.length > 0) {
+        html += `
+        <div class="data-gap-banner">
+          ★ ${heritage.length} Heritage Skill${heritage.length > 1 ? 's' : ''} recognized —
+          competencies your community values that formal taxonomies miss.
+        </div>`;
+      }
+
+      html += `<div class="section-title">Competencies</div>`;
+
+      for (const skill of skills) {
+        const evidenceLabel = EVIDENCE_LABELS[skill.evidence_type] || skill.evidence_type;
+        const badgeClass = EVIDENCE_BADGE_CLASS[skill.evidence_type] || 'badge-self';
+        const conf = Math.round((skill.confidence || 0.7) * 100);
+        const isHeritage = skill.is_heritage_skill;
+
+        html += `
+        <div class="skill-card ${isHeritage ? 'heritage' : ''}">
+          <div class="skill-label">${skill.skill_label}</div>
+          <div class="skill-meta">
+            <span class="badge ${badgeClass}">${evidenceLabel}</span>
+            ${isHeritage ? '<span class="badge badge-heritage">Heritage Skill</span>' : ''}
+            ${skill.isco_code ? `<span class="badge badge-isco">ISCO ${skill.isco_code}</span>` : ''}
+          </div>
+          <div class="confidence-bar">
+            <div class="confidence-fill" style="width:${conf}%"></div>
+          </div>
+        </div>`;
+      }
+
+      html += `
+        <div class="share-section">
+          <button class="share-btn" onclick="sharePassport('${passport.passport_id}')">
+            Share My Passport
+          </button>
+          ${passport.signature
+            ? '<div class="signed-indicator">✓ Cryptographically signed</div>'
+            : ''}
+        </div>`;
+
+      document.getElementById('app').innerHTML = html;
+    }
+
+    function sharePassport(passportId) {
+      const url = `${API_BASE}/passport/${passportId}`;
+      if (tg && tg.switchInlineQuery) {
+        tg.switchInlineQuery(`passport:${passportId}`);
+      } else if (navigator.share) {
+        navigator.share({ title: 'My UNMAPPED Skills Passport', url });
+      } else {
+        navigator.clipboard?.writeText(url);
+        alert('Passport link copied to clipboard!');
+      }
+    }
+
+    loadPassport();
+  </script>
+</body>
+</html>

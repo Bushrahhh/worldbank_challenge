@@ -1,0 +1,41 @@
+isco_code,isco_label,soc_code,soc_label,automation_probability,paper_year,notes
+7422,Electronics mechanics and servicers,49-2097,Electronic Home Entertainment Equipment Installers and Repairers,0.89,2013,Core LMIC repair economy occupation
+9211,Crop farm labourers,45-2093,Farmworkers and Laborers - Crop and Greenhouse,0.87,2013,Subsistence + commercial farming
+5220,Shop salespersons,41-2031,Retail Salespersons,0.92,2013,Market traders + formal retail
+7231,Motor vehicle mechanics and repairers,49-3023,Automotive Service Technicians and Mechanics,0.89,2013,Road transport maintenance
+9312,Civil engineering labourers,47-2061,Construction Laborers,0.88,2013,Infrastructure construction
+7531,Tailors and dressmakers,51-6052,Tailors Dressmakers and Custom Sewers,0.57,2013,Garment / kente / handloom craft
+8322,Car taxi and van drivers,53-3041,Taxi Drivers and Chauffeurs,0.89,2013,Mobility / logistics sector
+9412,Kitchen helpers,35-2021,Food Preparation Workers,0.81,2013,Hospitality and food services
+5321,Home-based personal care workers,31-1011,Home Health Aides,0.40,2013,Social care — harder to automate
+7411,Building and related electricians,47-2111,Electricians,0.15,2013,Skilled electrical — relatively durable
+7115,Carpenters and joiners,47-2031,Carpenters,0.32,2013,Construction skilled trades
+7212,Welders and flamecutters,51-4121,Welders Cutters Solderers and Brazers,0.87,2013,Metal fabrication
+5414,Security guards,33-9032,Security Guards and Gaming Surveillance Officers,0.84,2013,Watch duty largely automatable
+4311,Accounting and bookkeeping clerks,43-3031,Bookkeeping Accounting and Auditing Clerks,0.98,2013,Routine cognitive — high automation risk
+2341,Primary school teachers,25-2021,Elementary School Teachers,0.004,2013,Teaching involves social cognition — low risk
+2212,Specialist medical practitioners,29-1069,Physicians and Surgeons - All Other,0.004,2013,Diagnosis / dexterity — low automation risk
+7124,Plumbers and pipe fitters,47-2152,Plumbers Pipefitters and Steamfitters,0.35,2013,Skilled building services trades
+6130,Subsistence crop farmers,45-2099,Agricultural Workers - All Other,0.88,2013,Small-scale mixed farming
+3413,Technical and vocational education teachers,25-1194,Career and Technical Education Teachers,0.12,2013,Vocational instruction — social + adaptive
+2141,Industrial and production engineers,17-2112,Industrial Engineers,0.18,2013,Process design — non-routine analytical
+7421,Electronics fitters,49-2094,Electrical and Electronics Repairers - Commercial and Industrial,0.85,2013,Similar to 7422 but commercial scale
+3114,Electronics engineering technicians,17-3023,Electrical and Electronics Engineering Technicians,0.43,2013,Semi-routine technical work
+2411,Accountants,13-2011,Accountants and Auditors,0.94,2013,Rule-based financial work
+5120,Cooks,35-2014,Cooks - Restaurant,0.73,2013,Food preparation — partly automatable
+5111,Travel attendants and travel stewards,53-2031,Flight Attendants,0.54,2013,Customer service / safety role
+6111,Field crop and vegetable growers,45-2041,Graders and Sorters - Agricultural Products,0.71,2013,Commercial crop production
+7113,Stonemasons and brick layers,47-2021,Brickmasons and Blockmasons,0.89,2013,Structural masonry
+9111,Domestic cleaners and helpers,37-2011,Janitors and Cleaners,0.69,2013,Cleaning and domestic services
+7126,Plumbers gas fitters and related workers,47-2152,Plumbers Pipefitters and Steamfitters,0.35,2013,See 7124
+7214,Structural metal preparers and erectors,47-2221,Structural Iron and Steel Workers,0.87,2013,Heavy construction metalwork
+9133,Freight handlers,53-7062,Laborers and Freight Stock and Material Movers,0.86,2013,Logistics and warehousing
+4131,Stock clerks and order fillers,43-4151,Order Clerks,0.97,2013,Inventory + order processing — high automation
+3313,Securities and finance dealers and brokers,41-3021,Insurance Sales Agents,0.98,2013,Sales and financial services
+2635,Social work professionals,21-1022,Healthcare Social Workers,0.035,2013,Complex social needs assessment — low risk
+1342,Education managers,11-9033,Education Administrators - Postsecondary,0.09,2013,Institutional leadership — low risk
+7512,Wood treaters and related workers,51-7011,Cabinetmakers and Bench Carpenters,0.75,2013,Wood processing and finishing
+5112,Tour guides,39-7011,Tour Guides,0.62,2013,Tourism and cultural heritage
+3412,Insurance representatives,41-3021,Insurance Sales Agents,0.98,2013,Rule-based insurance processing
+8160,Food and related products machine operators,51-3091,Food and Tobacco Roasting Baking and Drying Machine Operators,0.86,2013,Agri-processing machinery
+7311,Precision instrument makers and repairers,49-9061,Camera and Photographic Equipment Repairers,0.47,2013,Precision trades — moderate automation

@@ -1,0 +1,11 @@
+INFO:     127.0.0.1:52149 - "POST /skills/interview/start HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52149 - "POST /skills/interview/message HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52149 - "POST /skills/interview/message HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52149 - "POST /skills/interview/message HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52157 - "GET /skills/passport/by_user/test_amara_002 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52603 - "GET /skills/passport/by_user/test_amara_002 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52603 - "GET /skills/passport/903fb7b3-ff95-489c-8742-2c53d677fbb5/qr HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52605 - "GET /skills/passport/by_user/test_amara_002 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52605 - "GET /skills/passport/903fb7b3-ff95-489c-8742-2c53d677fbb5/qr HTTP/1.1" 200 OK
+INFO:     127.0.0.1:62712 - "GET /skills/passport/903fb7b3-ff95-489c-8742-2c53d677fbb5/qr HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50034 - "GET /skills/passport/903fb7b3-ff95-489c-8742-2c53d677fbb5/text HTTP/1.1" 200 OK

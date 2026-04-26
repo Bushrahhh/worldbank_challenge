@@ -1,0 +1,333 @@
+# UNMAPPED Opportunity Catalog
+# Real opportunities — cited sources, honest wages, honest gaps.
+# Country-tagged: GHA = Ghana, BGD = Bangladesh, LMIC = both
+
+opportunities:
+
+  - id: opp_solar_tech_gh
+    title: Solar Installation Technician
+    employer_type: sme
+    sector: renewable_energy
+    isco_code: "7411"
+    country_iso: GHA
+    wage_month: 1800
+    currency: GHS
+    wage_source: "GOGLA Ghana Solar Survey 2023"
+    training_gap_months: 3
+    training_source: "NVTI Ghana 3-month solar installation certificate"
+    openings_estimate: 320
+    openings_source: "GOGLA Ghana market assessment 2023"
+    growth_pct_yr: 34
+    growth_source: "IRENA Jobs in Renewable Energy 2023"
+    required_isco: ["7411", "7422", "7421"]
+    required_skills:
+      - label: "Electrical installation basics"
+        weight: 0.9
+      - label: "Electronics troubleshooting"
+        weight: 0.7
+    tags: [growing, outdoor, heritage_adjacent]
+    why_good: "Ghana's off-grid solar market grew 34% last year. Phone repair troubleshooting skills transfer directly — diagnosis mindset is the same."
+    wrong_if: "You need consistent supply chain access. Remote rural locations (>80km from district capital) face parts availability challenges."
+    automation_risk_calibrated: 0.15
+
+  - id: opp_ict_support_gh
+    title: ICT User Support Technician
+    employer_type: company
+    sector: digital_services
+    isco_code: "3512"
+    country_iso: GHA
+    wage_month: 2400
+    currency: GHS
+    wage_source: "Ghana IT Association salary survey 2023"
+    training_gap_months: 4
+    training_source: "CompTIA A+ or NIIT Ghana 4-month program"
+    openings_estimate: 210
+    openings_source: "Ghana IT Association job market report 2023"
+    growth_pct_yr: 18
+    growth_source: "WDI ICT services employment growth 2022"
+    required_isco: ["3512", "3511", "7422"]
+    required_skills:
+      - label: "Hardware troubleshooting"
+        weight: 0.85
+      - label: "Customer communication"
+        weight: 0.75
+      - label: "Basic networking"
+        weight: 0.6
+    tags: [office, growing, digital]
+    why_good: "You already diagnose hardware failures under pressure. Add networking basics and you have 80% of this role covered."
+    wrong_if: "Requires Accra or Kumasi presence for most employers. Remote/hybrid rare at entry level."
+    automation_risk_calibrated: 0.38
+
+  - id: opp_momo_supervisor_gh
+    title: Mobile Money Agent Supervisor
+    employer_type: telecom
+    sector: fintech
+    isco_code: "4211"
+    country_iso: GHA
+    wage_month: 2100
+    currency: GHS
+    wage_source: "Bank of Ghana Mobile Money Annual Report 2023"
+    training_gap_months: 1
+    training_source: "MTN/Vodafone agent certification — 2 weeks"
+    openings_estimate: 450
+    openings_source: "Bank of Ghana registered agent network 2023"
+    growth_pct_yr: 22
+    growth_source: "Bank of Ghana Financial Inclusion Report 2023"
+    required_isco: ["4211", "1219"]
+    required_skills:
+      - label: "Mobile money operations"
+        weight: 1.0
+      - label: "Trust and community network"
+        weight: 0.9
+      - label: "Basic record-keeping"
+        weight: 0.8
+    tags: [heritage_fit, financial, community, fast_entry]
+    why_good: "Your mobile money fluency and community trust are exactly what this role needs. Training gap is 2 weeks — shortest of any match."
+    wrong_if: "Float management requires upfront capital (GHS 5,000–20,000 minimum). This is a real barrier for most."
+    automation_risk_calibrated: 0.28
+
+  - id: opp_ewaste_tech_gh
+    title: E-Waste Recovery Technician
+    employer_type: ngo_enterprise
+    sector: circular_economy
+    isco_code: "7422"
+    country_iso: GHA
+    wage_month: 1600
+    currency: GHS
+    wage_source: "Closing the Loop Ghana operations estimate 2023"
+    training_gap_months: 2
+    training_source: "Agbogbloshie Makerspace Platform certification"
+    openings_estimate: 85
+    openings_source: "Closing the Loop + Pure Earth Ghana programs 2023"
+    growth_pct_yr: 28
+    growth_source: "UNEP E-Waste Africa Report 2022"
+    required_isco: ["7422", "9211"]
+    required_skills:
+      - label: "Electronics disassembly and sorting"
+        weight: 1.0
+      - label: "Hazardous material awareness"
+        weight: 0.7
+    tags: [growing, environmental, adjacent_to_current]
+    why_good: "Extremely close to what you already do. The same disassembly skills, repurposed. Ghana is becoming a hub for formal e-waste processing."
+    wrong_if: "Physical and chemical hazard exposure is real — proper PPE required and not always supplied. Ask specifically."
+    automation_risk_calibrated: 0.22
+
+  - id: opp_digital_marketing_gh
+    title: Digital Marketing Assistant
+    employer_type: sme
+    sector: services
+    isco_code: "2431"
+    country_iso: GHA
+    wage_month: 1900
+    currency: GHS
+    wage_source: "Ghana Employers Association SME salary survey 2023"
+    training_gap_months: 6
+    training_source: "Google Digital Skills for Africa (free) + Hubspot cert"
+    openings_estimate: 180
+    openings_source: "Ghana Employers Association jobs report 2023"
+    growth_pct_yr: 31
+    growth_source: "Meta Africa SME digital adoption report 2023"
+    required_isco: ["2431", "2166"]
+    required_skills:
+      - label: "Digital content creation"
+        weight: 0.8
+      - label: "Social media literacy"
+        weight: 0.85
+      - label: "Basic analytics"
+        weight: 0.6
+    tags: [growing, remote_possible, digital, creative]
+    why_good: "Your self-directed learning from YouTube shows you can pick up digital tools fast. Training resources are free (Google/Meta programs)."
+    wrong_if: "Creative output is subjective — portfolio matters more than certificates here. Budget 3–6 months building one before applying."
+    automation_risk_calibrated: 0.09
+
+  - id: opp_tvet_instructor_gh
+    title: TVET Electronics Instructor
+    employer_type: government
+    sector: education
+    isco_code: "2320"
+    country_iso: GHA
+    wage_month: 2600
+    currency: GHS
+    wage_source: "Ghana Education Service salary scales 2023"
+    training_gap_months: 6
+    training_source: "NVTI teaching certificate — evening program"
+    openings_estimate: 95
+    openings_source: "COTVET Ghana workforce gap report 2023"
+    growth_pct_yr: 12
+    growth_source: "COTVET Ghana annual report 2022"
+    required_isco: ["2320", "7422"]
+    required_skills:
+      - label: "Electronics practical knowledge"
+        weight: 1.0
+      - label: "Ability to explain and demonstrate"
+        weight: 0.85
+    tags: [stable, government, community_impact]
+    why_good: "Your hands-on skills + multilingual ability = rare teaching combination. Demand for TVET electronics is outpacing supply of qualified instructors."
+    wrong_if: "Government hiring cycles are slow (6–18 months). Interim income gap is real."
+    automation_risk_calibrated: 0.04
+
+  - id: opp_agri_extension_gh
+    title: Agricultural Extension Officer (Digital)
+    employer_type: ngo
+    sector: agriculture
+    isco_code: "3213"
+    country_iso: GHA
+    wage_month: 2000
+    currency: GHS
+    wage_source: "MoFA Ghana extension officer scales 2022"
+    training_gap_months: 8
+    training_source: "MOFA Ghana certificate + smartphone farming apps training"
+    openings_estimate: 120
+    openings_source: "USAID Feed the Future Ghana 2023"
+    growth_pct_yr: 9
+    growth_source: "World Bank Ghana agricultural productivity report 2022"
+    required_isco: ["3213", "1311"]
+    required_skills:
+      - label: "Agricultural knowledge"
+        weight: 0.7
+      - label: "Community engagement"
+        weight: 0.9
+      - label: "Smartphone data collection"
+        weight: 0.75
+    tags: [community, rural_viable, stable]
+    why_good: "Community trust + multilingual communication are the hardest parts of this job. The technical knowledge is teachable."
+    wrong_if: "Most positions require field mobility across villages. Motorcycle or transport access is a real dependency."
+    automation_risk_calibrated: 0.22
+
+  # ── Bangladesh opportunities ──────────────────────────────────────────────
+
+  - id: opp_rmc_operator_bd
+    title: RMG Quality Control Operator
+    employer_type: factory
+    sector: garments
+    isco_code: "7531"
+    country_iso: BGD
+    wage_month: 12000
+    currency: BDT
+    wage_source: "Bangladesh Garment Manufacturers Association wage data 2023"
+    training_gap_months: 2
+    training_source: "BGMEA training institute — 6-week QC program"
+    openings_estimate: 2800
+    openings_source: "BGMEA labor demand survey 2023"
+    growth_pct_yr: 6
+    growth_source: "World Bank Bangladesh garments sector report 2023"
+    required_isco: ["7531", "7512"]
+    required_skills:
+      - label: "Textile quality inspection"
+        weight: 0.9
+      - label: "Documentation and record-keeping"
+        weight: 0.75
+    tags: [stable, large_employer, structured]
+    why_good: "Precision work — the same attention to detail from embroidery and handloom transfers directly. QC is becoming critical as buyers demand compliance."
+    wrong_if: "Factory conditions vary widely. Ask specifically about fire safety certification, overtime policies, and women's committee presence."
+    automation_risk_calibrated: 0.42
+
+  - id: opp_bkash_agent_bd
+    title: bKash Agent Network Supervisor
+    employer_type: fintech
+    sector: mobile_finance
+    isco_code: "4211"
+    country_iso: BGD
+    wage_month: 18000
+    currency: BDT
+    wage_source: "bKash agent network compensation 2023"
+    training_gap_months: 1
+    training_source: "bKash 2-week agent certification"
+    openings_estimate: 600
+    openings_source: "Bangladesh Bank MFS market report 2023"
+    growth_pct_yr: 28
+    growth_source: "Bangladesh Bank Financial Inclusion Report 2023"
+    required_isco: ["4211"]
+    required_skills:
+      - label: "bKash / mobile money operations"
+        weight: 1.0
+      - label: "Community trust network"
+        weight: 0.9
+    tags: [heritage_fit, fast_entry, fintech, growing]
+    why_good: "bKash fluency is the exact skill this role requires. Fastest path to income improvement in the catalog."
+    wrong_if: "Float capital requirement is BDT 50,000–150,000 minimum. Microfinance partnership can bridge this."
+    automation_risk_calibrated: 0.28
+
+  - id: opp_solar_bd
+    title: Solar Home System Technician
+    employer_type: ngo_enterprise
+    sector: renewable_energy
+    isco_code: "7411"
+    country_iso: BGD
+    wage_month: 15000
+    currency: BDT
+    wage_source: "IDCOL Solar Bangladesh technician salary data 2023"
+    training_gap_months: 3
+    training_source: "IDCOL / Grameen Shakti 3-month SHS tech training"
+    openings_estimate: 800
+    openings_source: "IDCOL Bangladesh solar program report 2023"
+    growth_pct_yr: 19
+    growth_source: "IRENA Jobs in Renewable Energy Bangladesh 2023"
+    required_isco: ["7411", "7422"]
+    required_skills:
+      - label: "Solar panel installation and maintenance"
+        weight: 0.85
+      - label: "Electronics troubleshooting"
+        weight: 0.75
+    tags: [growing, rural_viable, outdoor]
+    why_good: "Bangladesh has 6 million Solar Home Systems deployed. Maintenance demand is enormous and technically underserved."
+    wrong_if: "Most deployment is rural — travel across difficult terrain is required."
+    automation_risk_calibrated: 0.15
+
+  # ── Cross-country (LMIC) ──────────────────────────────────────────────────
+
+  - id: opp_community_health_lmic
+    title: Community Health Worker
+    employer_type: ngo
+    sector: health
+    isco_code: "3253"
+    country_iso: LMIC
+    wage_month: 1400
+    currency: LOCAL
+    wage_source: "WHO Community Health Worker review 2022"
+    training_gap_months: 3
+    training_source: "Ministry of Health basic CHW certificate — 3 months"
+    openings_estimate: 500
+    openings_source: "WHO Africa CHW gap analysis 2022"
+    growth_pct_yr: 15
+    growth_source: "WHO Global Health Observatory 2023"
+    required_isco: ["3253", "2635"]
+    required_skills:
+      - label: "Community trust and social network"
+        weight: 1.0
+      - label: "Basic health knowledge"
+        weight: 0.7
+      - label: "Record-keeping"
+        weight: 0.65
+    tags: [community, stable, impact, rural_viable, heritage_fit]
+    why_good: "Community trust is the hardest part of this job. You already have it. Medical knowledge is teachable."
+    wrong_if: "Wages are below average. Impact is high but financial uplift is limited at CHW level."
+    automation_risk_calibrated: 0.04
+
+  - id: opp_logistics_dispatcher_lmic
+    title: Last-Mile Logistics Dispatcher
+    employer_type: startup
+    sector: logistics
+    isco_code: "4323"
+    country_iso: LMIC
+    wage_month: 1700
+    currency: LOCAL
+    wage_source: "Kobo360 / Lori Systems dispatcher pay estimate 2023"
+    training_gap_months: 2
+    training_source: "Internal dispatcher training — 3 weeks + 6 weeks supervised"
+    openings_estimate: 340
+    openings_source: "AfDB Logistics Africa jobs report 2023"
+    growth_pct_yr: 26
+    growth_source: "WDI transport and logistics employment 2022"
+    required_isco: ["4323", "4229"]
+    required_skills:
+      - label: "Local geographic knowledge"
+        weight: 0.9
+      - label: "Mobile data coordination"
+        weight: 0.8
+      - label: "Informal network leverage"
+        weight: 0.85
+    tags: [growing, mobile_heavy, informal_to_formal]
+    why_good: "Hyperlocal knowledge and network trust are exactly what dispatch logistics needs. Smartphone-first workflows favour digital-native operators."
+    wrong_if: "Highly variable hours. Stress peaks around demand surges. Not suited to caregiving responsibilities without flexibility agreements."
+    automation_risk_calibrated: 0.35

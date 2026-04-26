@@ -1,0 +1,42 @@
+INFO:     Started server process [3608]
+INFO:     Waiting for application startup.
+2026-04-25 21:31:18,435 [INFO] backend.config_loader — UNMAPPED config loaded | country=ghana | path=C:\Users\Cyber Lab\Desktop\worldbank_challenge\configs\ghana.yaml
+2026-04-25 21:31:18,435 [WARNING] backend.config_loader — [DATA GAP MEDIUM] [ghana/step_outdated] World Bank STEP survey data for Ghana is from 2012–2014. Skills demand estimates use regional Sub-Saharan Africa proxies for 2015–2025 changes. | source: World Bank STEP 2012–2014 (GHA) + SSA regional trend proxy
+2026-04-25 21:31:18,435 [WARNING] backend.config_loader — [DATA GAP MEDIUM] [ghana/informal_wages] Formal wage floors from ILOSTAT. Informal sector wages estimated from Ghana Living Standards Survey (GLSS-8, 2017) and adjusted by CPI. Actual informal wages vary significantly by locality and season. | source: ILOSTAT formal wages + GLSS-8 2017 informal estimate
+2026-04-25 21:31:18,436 [WARNING] backend.config_loader — [DATA GAP LOW] [ghana/geo_opportunity] Opportunity counts by location are modelled from sector employment density data, not live vacancy feeds. Rural figures especially uncertain. | source: GSS Economic Census 2020 + sector employment density model
+2026-04-25 21:31:18,436 [WARNING] backend.config_loader — [DATA GAP HIGH] [ghana/displacement_projections] 2035 projections use Wittgenstein Centre education scenarios combined with ILO Future of Work task-displacement estimates. Projection uncertainty is ±40% at the district level. | source: Wittgenstein Centre (2023 revision) + ILO WESO 2024
+2026-04-25 21:31:18,436 [INFO] backend.main — UNMAPPED starting | country=GHA (Ghana) | currency=GHS | informal_share=89%
+2026-04-25 21:31:18,440 [INFO] backend.main — Database initialized
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+2026-04-25 21:31:54,003 [WARNING] backend.modules.skills_signal.interview — No GROQ_API_KEY — using mock interview responses
+2026-04-25 21:31:54,048 [WARNING] backend.modules.skills_signal.interview — No GROQ_API_KEY — using mock interview responses
+2026-04-25 21:31:55,881 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Mobile+device+repair+and+diagnosis+I+fix+phones+for+a+living.+I+replace+screens+and+batteries.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:31:55,883 [WARNING] backend.adapters.esco — [ESCO] attempt 1 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Mobile+device+repair+and+diagnosis+I+fix+phones+for+a+living.+I+replace+screens+and+batteries.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+2026-04-25 21:31:57,122 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Mobile+device+repair+and+diagnosis+I+fix+phones+for+a+living.+I+replace+screens+and+batteries.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:31:57,126 [WARNING] backend.adapters.esco — [ESCO] attempt 2 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Mobile+device+repair+and+diagnosis+I+fix+phones+for+a+living.+I+replace+screens+and+batteries.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+2026-04-25 21:31:59,273 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Mobile+device+repair+and+diagnosis+I+fix+phones+for+a+living.+I+replace+screens+and+batteries.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:31:59,276 [WARNING] backend.adapters.esco — [ESCO] attempt 3 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Mobile+device+repair+and+diagnosis+I+fix+phones+for+a+living.+I+replace+screens+and+batteries.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+2026-04-25 21:31:59,298 [WARNING] backend.modules.skills_signal.interview — No GROQ_API_KEY — using mock interview responses
+2026-04-25 21:31:59,859 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Multilingual+customer+service+I+use+MoMo+to+collect+payments+from+customers.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:31:59,862 [WARNING] backend.adapters.esco — [ESCO] attempt 1 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Multilingual+customer+service+I+use+MoMo+to+collect+payments+from+customers.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+2026-04-25 21:32:01,012 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Multilingual+customer+service+I+use+MoMo+to+collect+payments+from+customers.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:32:01,016 [WARNING] backend.adapters.esco — [ESCO] attempt 2 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Multilingual+customer+service+I+use+MoMo+to+collect+payments+from+customers.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+2026-04-25 21:32:03,251 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Multilingual+customer+service+I+use+MoMo+to+collect+payments+from+customers.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:32:03,254 [WARNING] backend.adapters.esco — [ESCO] attempt 3 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Multilingual+customer+service+I+use+MoMo+to+collect+payments+from+customers.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+2026-04-25 21:32:03,266 [WARNING] backend.modules.skills_signal.interview — No GROQ_API_KEY — using mock interview responses
+2026-04-25 21:32:03,967 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Self-directed+technical+learning+I+also+taught+myself+coding+from+YouTube+in+my+spare+time.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:32:03,970 [WARNING] backend.adapters.esco — [ESCO] attempt 1 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Self-directed+technical+learning+I+also+taught+myself+coding+from+YouTube+in+my+spare+time.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+2026-04-25 21:32:05,197 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Self-directed+technical+learning+I+also+taught+myself+coding+from+YouTube+in+my+spare+time.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:32:05,199 [WARNING] backend.adapters.esco — [ESCO] attempt 2 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Self-directed+technical+learning+I+also+taught+myself+coding+from+YouTube+in+my+spare+time.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
+2026-04-25 21:32:07,410 [INFO] httpx — HTTP Request: GET https://esco.ec.europa.eu/api/search?text=Self-directed+technical+learning+I+also+taught+myself+coding+from+YouTube+in+my+spare+time.&type=skill&language=en&limit=5&full=false "HTTP/1.1 403 Forbidden"
+2026-04-25 21:32:07,413 [WARNING] backend.adapters.esco — [ESCO] attempt 3 failed: Client error '403 Forbidden' for url 'https://esco.ec.europa.eu/api/search?text=Self-directed+technical+learning+I+also+taught+myself+coding+from+YouTube+in+my+spare+time.&type=skill&language=en&limit=5&full=false'
+For more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/403
